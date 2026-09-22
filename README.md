@@ -4,6 +4,8 @@ Site em Streamlit que recebe o título e o texto de uma notícia e mostra a clas
 
 Escolha **Usar um link**, cole o endereço público e clique em **Ler link e analisar**. O site extrai o título e o texto, mostra o conteúdo encontrado e executa a classificação automaticamente. A opção **Colar título e texto** continua disponível.
 
+A interface tem áreas de entrada e resultado, gráfico circular para a classe prevista e uma barra comparativa das pontuações. O estilo está em `web/estilo.css`, com ajustes para telas menores. O aviso sobre os limites do modelo fica abaixo da análise.
+
 Links de mensagens privadas, páginas com login, paywall ou conteúdo carregado por JavaScript podem não ser lidos. A extração é automática e pode incluir trechos incorretos; confira o conteúdo mostrado. PDFs, imagens e vídeos não são aceitos. A análise continua limitada ao início do texto, conforme o modelo treinado.
 
 **É apenas um modelo de inteligência artificial e pode errar.** Os percentuais são escores do modelo, não uma garantia de veracidade. Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.

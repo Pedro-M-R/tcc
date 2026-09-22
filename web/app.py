@@ -5,6 +5,7 @@ import logging
 import streamlit as st
 
 from inferencia import Classificador, caminho_modelo
+from extrair_link import ErroLink, extrair_noticia
 
 
 st.set_page_config(page_title="Notícia em análise", page_icon="📰", layout="centered")
@@ -33,19 +34,48 @@ st.markdown("""
 
 st.markdown('<div class="eyebrow">ANÁLISE DE NOTÍCIAS · BERTIMBAU</div>', unsafe_allow_html=True)
 st.title("O que a notícia diz?")
-st.markdown('<p class="intro">Cole o título e o texto para ver como o modelo classifica a notícia.</p>',
+st.markdown('<p class="intro">Envie um link ou cole o conteúdo para analisar a notícia.</p>',
             unsafe_allow_html=True)
 
-with st.form("noticia"):
-    titulo = st.text_input("Título da notícia", placeholder="Digite ou cole o título", max_chars=500)
-    texto = st.text_area("Texto da notícia", placeholder="Cole o conteúdo da notícia aqui…",
-                         height=240, max_chars=30000)
-    enviar = st.form_submit_button("Analisar notícia", type="primary", use_container_width=True)
+modo = st.radio("Como você quer analisar?", ["Colar título e texto", "Usar um link"], horizontal=True)
+titulo, texto = "", ""
+noticia_extraida = None
+if modo == "Colar título e texto":
+    with st.form("noticia"):
+        titulo = st.text_input("Título da notícia", placeholder="Digite ou cole o título", max_chars=500)
+        texto = st.text_area("Texto da notícia", placeholder="Cole o conteúdo da notícia aqui…",
+                             height=240, max_chars=30000)
+        enviar = st.form_submit_button("Analisar notícia", type="primary", use_container_width=True)
+else:
+    st.caption("Use o link público da notícia. Mensagens privadas, páginas com login e alguns sites "
+               "podem não permitir a leitura automática.")
+    with st.form("link"):
+        url = st.text_input("Link da notícia ou publicação", placeholder="https://site.com/noticia", max_chars=2048)
+        enviar = st.form_submit_button("Ler link e analisar", type="primary", use_container_width=True)
+    if enviar:
+        try:
+            with st.spinner("Lendo o título e o texto da página…"):
+                noticia_extraida = extrair_noticia(url)
+                titulo, texto = noticia_extraida["titulo"], noticia_extraida["texto"]
+        except ErroLink as erro:
+            st.warning(str(erro))
+            enviar = False
+        except Exception:
+            st.error("Não foi possível ler o conteúdo desse link. Use a opção de colar o título e o texto.")
+            enviar = False
 
 if enviar:
     if not titulo.strip() or not texto.strip():
         st.warning("Preencha o título e o texto da notícia para continuar.")
     else:
+        if noticia_extraida:
+            with st.expander("Título e texto encontrados", expanded=True):
+                st.text(titulo)
+                st.text_area("Texto extraído da página", value=texto, height=180, disabled=True)
+                st.caption("Confira se este é o conteúdo que você queria analisar. Se a extração estiver incorreta, "
+                           "use a opção de colar o título e o texto.")
+                if noticia_extraida["texto_limitado"]:
+                    st.caption("A leitura foi limitada aos primeiros 30 mil caracteres da página.")
         try:
             with st.spinner("Analisando a notícia… O primeiro acesso pode levar alguns instantes."):
                 classificador = carregar_modelo(str(caminho_modelo()))

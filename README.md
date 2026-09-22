@@ -2,6 +2,10 @@
 
 Site em Streamlit que recebe o título e o texto de uma notícia e mostra a classificação **Verdadeira** ou **Falsa**, com os percentuais atribuídos pelo BERTimbau a cada classe.
 
+Escolha **Usar um link**, cole o endereço público e clique em **Ler link e analisar**. O site extrai o título e o texto, mostra o conteúdo encontrado e executa a classificação automaticamente. A opção **Colar título e texto** continua disponível.
+
+Links de mensagens privadas, páginas com login, paywall ou conteúdo carregado por JavaScript podem não ser lidos. A extração é automática e pode incluir trechos incorretos; confira o conteúdo mostrado. PDFs, imagens e vídeos não são aceitos. A análise continua limitada ao início do texto, conforme o modelo treinado.
+
 **É apenas um modelo de inteligência artificial e pode errar.** Os percentuais são escores do modelo, não uma garantia de veracidade. Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.
 
 ## Publicar no Streamlit

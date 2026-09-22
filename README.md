@@ -8,6 +8,12 @@ A interface tem áreas de entrada e resultado, gráfico circular para a classe p
 
 Links de mensagens privadas, páginas com login, paywall ou conteúdo carregado por JavaScript podem não ser lidos. A extração é automática e pode incluir trechos incorretos; confira o conteúdo mostrado. PDFs, imagens e vídeos não são aceitos. A análise continua limitada ao início do texto, conforme o modelo treinado.
 
+### Links de checagem
+
+Quando uma página do Boatos.org contém uma alegação identificada e um selo explícito na seção **Conclusão**, o site mostra **a conclusão publicada pela fonte** com um link para a checagem. Essa conclusão não recebe um percentual de confiança inventado. O domínio, sozinho, nunca determina o resultado.
+
+A previsão do BERTimbau para o texto da página fica separada em **Ver previsão do BERTimbau para o texto da checagem**. Se os rótulos diferirem, a interface avisa sobre a divergência. O modelo não foi retreinado e pode continuar errando; classificar o estilo de um artigo de checagem não equivale a verificar a alegação citada nele. Outros links e textos colados continuam usando a previsão do modelo.
+
 **É apenas um modelo de inteligência artificial e pode errar.** Os percentuais são escores do modelo, não uma garantia de veracidade. Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.
 
 ## Publicar no Streamlit

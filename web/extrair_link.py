@@ -112,9 +112,13 @@ def baixar_html(url):
 def extrair_html(html, url):
     from lxml import html as parser_html
     from readability import Document
+    from checagem import extrair_checagem
 
     documento = Document(html)
-    titulo = " ".join(documento.short_title().split())
+    arvore = parser_html.fromstring(html)
+    cabecalhos = arvore.xpath("//article//h1") or arvore.xpath("//h1")
+    titulo = " ".join((cabecalhos[0].text_content() if cabecalhos else documento.short_title()).split())
+    checagem = extrair_checagem(arvore, url)
     corpo = parser_html.fromstring(documento.summary(html_partial=True))
     # Mantém separação entre parágrafos, sem enviar HTML à interface ou ao modelo.
     for elemento in corpo.xpath(".//script|.//style|.//nav|.//footer|.//form"):
@@ -127,7 +131,7 @@ def extrair_html(html, url):
         raise ErroLink("Não encontrei título e texto suficientes para analisar. "
                        "A página pode exigir login ou carregar o conteúdo dinamicamente. Cole o conteúdo na outra opção.")
     return {"titulo": titulo[:500], "texto": texto[:MAX_TEXTO], "url": url,
-            "texto_limitado": len(texto) > MAX_TEXTO}
+            "texto_limitado": len(texto) > MAX_TEXTO, "checagem": checagem}
 
 
 def extrair_noticia(url):

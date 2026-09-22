@@ -17,6 +17,21 @@ def carregar_modelo(caminho):
     return Classificador(caminho)
 
 
+def mostrar_checagem(checagem):
+    rotulo = "Alegação falsa" if checagem["rotulo"] == "fake" else "Alegação verdadeira"
+    classe = "falsa" if checagem["rotulo"] == "fake" else "verdadeira"
+    st.markdown(
+        f'<section class="resultado {classe}" role="status"><div>'
+        f'<p>Conclusão publicada pelo Boatos.org</p><h2>{rotulo}</h2>'
+        '</div></section>', unsafe_allow_html=True,
+    )
+    st.caption("Alegação examinada pela fonte:")
+    st.text(checagem["alegacao"])
+    st.link_button("Ler a checagem no Boatos.org", checagem["url"])
+    st.caption("O resultado acima foi extraído do selo de conclusão da página. "
+               "A pontuação do BERTimbau, quando disponível abaixo, se refere ao texto da checagem.")
+
+
 def mostrar_resultado(resultado):
     verdadeira = resultado["rotulo"] == "true"
     classe = "verdadeira" if verdadeira else "falsa"
@@ -121,6 +136,9 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
         if not titulo.strip() or not texto.strip():
             st.warning("Preencha o título e o texto da notícia para continuar.")
         else:
+            checagem = noticia_extraida.get("checagem") if noticia_extraida else None
+            if checagem:
+                mostrar_checagem(checagem)
             try:
                 with st.spinner("Analisando a notícia… O primeiro acesso pode levar alguns instantes."):
                     classificador = carregar_modelo(str(caminho_modelo()))
@@ -130,7 +148,14 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
                 st.error("Não foi possível analisar agora. Tente novamente em instantes. "
                          "Se o problema continuar, avise o responsável pelo site.")
             else:
-                mostrar_resultado(resultado)
+                if checagem:
+                    if resultado["rotulo"] != checagem["rotulo"]:
+                        st.warning("A previsão do BERTimbau diverge da conclusão da fonte. "
+                                   "O modelo avaliou o texto da checagem e não verificou os fatos da alegação.")
+                    with st.expander("Ver previsão do BERTimbau para o texto da checagem"):
+                        mostrar_resultado(resultado)
+                else:
+                    mostrar_resultado(resultado)
     else:
         st.markdown('''<div class="vazio"><div class="vazio-icone" aria-hidden="true"><span>◎</span></div>
         <h3>Todo resultado começa<br>com uma boa leitura.</h3>

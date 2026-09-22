@@ -11,7 +11,7 @@ Site em Streamlit que recebe o título e o texto de uma notícia e mostra a clas
    - **Repository:** `Pedro-M-R/tcc`
    - **Branch:** `main`
    - **Main file path:** `web/app.py`
-3. Em **Advanced settings**, selecione **Python 3.11**.
+3. Em **Advanced settings**, selecione **Python 3.14**. As dependências também são compatíveis com Python 3.11 a 3.13.
 4. Clique em **Deploy** e aguarde a instalação das dependências e o carregamento do modelo.
 
 Também é possível usar **Paste GitHub URL** com `https://github.com/Pedro-M-R/tcc/blob/main/web/app.py`.
@@ -20,7 +20,7 @@ As dependências estão em `web/requirements.txt`. Não são necessários secret
 
 ## Executar localmente
 
-Instale Python 3.11 ou 3.12, Git e Git LFS. No terminal:
+Instale Python 3.11 a 3.14, Git e Git LFS. No terminal:
 
 ```bash
 git clone https://github.com/Pedro-M-R/tcc.git

@@ -16,6 +16,10 @@ A previsão do BERTimbau para o texto da página fica separada em **Ver previsã
 
 **É apenas um modelo de inteligência artificial e pode errar.** Os percentuais são escores do modelo, não uma garantia de veracidade. Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.
 
+Pontuações que seriam arredondadas a 100,0% ou 0,0% aparecem como **>99,9%** ou **<0,1%**. Isso muda somente a formatação; a classe e as probabilidades originais são preservadas. Em **Conferir o que o modelo analisou**, veja os valores originais, o trecho reconstruído da entrada e a quantidade de tokens lidos. Pontuações altas podem ocorrer em previsões erradas; este ajuste não calibra nem retreina o modelo.
+
+O rodapé identifica a revisão instalada. A revisão de diagnóstico é **2026.09.22-3**. A configuração permite detectar atualizações do código; se uma publicação antiga persistir, reinicie o aplicativo pelo painel do Streamlit.
+
 ## Publicar no Streamlit
 
 1. Entre em [Streamlit Community Cloud](https://share.streamlit.io/) e clique em **Create app**.

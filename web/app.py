@@ -1,12 +1,14 @@
 """Execute a partir da raiz: python -m streamlit run web/app.py."""
 
 import logging
+from html import escape
 from pathlib import Path
 
 import streamlit as st
 
 from inferencia import Classificador, caminho_modelo
 from extrair_link import ErroLink, extrair_noticia
+from apresentacao import formatar_probabilidade
 
 
 st.set_page_config(page_title="Notícia em análise", page_icon="📰", layout="wide")
@@ -39,7 +41,7 @@ def mostrar_resultado(resultado):
     prob_true = resultado["probabilidades"]["true"] * 100
     prob_fake = resultado["probabilidades"]["fake"] * 100
     destaque = prob_true if verdadeira else prob_fake
-    percentual = f"{destaque:.1f}%".replace(".", ",")
+    percentual = escape(formatar_probabilidade(resultado["probabilidades"][resultado["rotulo"]]))
     st.markdown(
         f'<section class="resultado {classe}" role="status">'
         f'<div><p>Classificação do modelo</p><h2>{rotulo}</h2>'
@@ -57,13 +59,21 @@ def mostrar_resultado(resultado):
         unsafe_allow_html=True,
     )
     coluna_true, coluna_fake = st.columns(2)
-    coluna_true.metric("Verdadeira", f"{prob_true:.1f}%".replace(".", ","))
-    coluna_fake.metric("Falsa", f"{prob_fake:.1f}%".replace(".", ","))
+    coluna_true.metric("Verdadeira", formatar_probabilidade(resultado["probabilidades"]["true"]))
+    coluna_fake.metric("Falsa", formatar_probabilidade(resultado["probabilidades"]["fake"]))
     st.caption("Os percentuais representam a pontuação atribuída pelo modelo a cada classe. "
                "Eles não medem quanto da notícia foi comprovado nem garantem a chance real de ela ser verdadeira.")
     if resultado["truncado"]:
         st.caption("Esta notícia ultrapassa o tamanho de leitura do modelo. "
                    "O resultado considera o título e o início do texto.")
+    if resultado.get("trecho_lido"):
+        with st.expander("Conferir o que o modelo analisou"):
+            st.caption(f"Foram lidos {resultado['tokens_lidos']} de {resultado['tokens_totais']} tokens "
+                       "(partes de palavras, incluindo marcadores do modelo).")
+            st.text(resultado["trecho_lido"])
+            st.caption("Trecho reconstruído a partir da entrada do modelo; os espaços podem diferir do original.")
+            st.caption("Pontuações com mais casas decimais, sem calibração de confiança:")
+            st.json(resultado["probabilidades"])
 
 
 st.markdown(Path(__file__).with_name("estilo.css").read_text(encoding="utf-8-sig"), unsafe_allow_html=True)
@@ -168,4 +178,4 @@ with st.container(key="aviso_modelo"):
             "Não considere o resultado 100% certo, mesmo quando o percentual for alto. "
             "Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.")
 st.markdown('<div class="rodape"><span>Notícia em análise · Projeto acadêmico</span>'
-            '<span>Análise de linguagem com BERTimbau</span></div>', unsafe_allow_html=True)
+            '<span>BERTimbau · Revisão 2026.09.22-3</span></div>', unsafe_allow_html=True)

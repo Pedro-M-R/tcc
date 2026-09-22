@@ -66,4 +66,7 @@ class Classificador:
                 for i, probabilidade in enumerate(probs)
             },
             "truncado": len(tokens) > self.limite,
+            "tokens_lidos": int(entradas["attention_mask"].sum().item()),
+            "tokens_totais": len(tokens),
+            "trecho_lido": self.tokenizer.decode(entradas["input_ids"][0], skip_special_tokens=True),
         }

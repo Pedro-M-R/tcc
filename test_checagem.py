@@ -52,6 +52,7 @@ class TestChecagem(unittest.TestCase):
         modelo.analisar.return_value = {"rotulo": "true", "truncado": True,
                                        "probabilidades": {"fake": .001, "true": .999}}
         app = AppTest.from_file(str(Path(__file__).resolve().parent / "web/app.py")).run()
+        app.selectbox[0].set_value("BERTimbau Base").run()
         app.radio[0].set_value("Usar um link").run()
         with patch("extrair_link.extrair_noticia", return_value=noticia):
             with patch("inferencia.Classificador", return_value=modelo):
@@ -60,7 +61,7 @@ class TestChecagem(unittest.TestCase):
         self.assertEqual(len(app.exception), 0)
         self.assertTrue(any("Alegação falsa" in m.value and "Boatos.org" in m.value for m in app.markdown))
         self.assertTrue(any("diverge" in w.value for w in app.warning))
-        self.assertEqual(app.metric[0].value, "99,9%")
+        self.assertEqual(app.metric[0].value, "99,90%")
         self.assertTrue(any("texto da checagem" in e.label for e in app.expander))
         st.cache_resource.clear()
 

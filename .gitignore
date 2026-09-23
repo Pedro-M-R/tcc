@@ -1,5 +1,7 @@
 .venv/
 .venv-site/
+.venv-validacao/
+.publicacao/
 __pycache__/
 *.pyc
 modelos/*
@@ -11,6 +13,10 @@ modelos/bertimbau_128_es/*
 !modelos/bertimbau_128_es/tokenizer_config.json
 !modelos/bertimbau_128_es/special_tokens_map.json
 !modelos/bertimbau_128_es/vocab.txt
+!modelos/bertimbau_128_es/configuracao_treino.json
+!modelos/svm/
+modelos/svm/*
+!modelos/svm/modelo.joblib
 resultados/
 .streamlit/secrets.toml
 .env

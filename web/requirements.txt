@@ -1,8 +1,12 @@
-# Dependências do site de classificação com BERTimbau.
-# Revisão 2026.09.22-3: reconstruir o ambiente para ativar a atualização do aplicativo.
+# Dependências da mesma comparação SVM + BERTimbau da janela local.
+# Python 3.13 (scikit-learn 1.5.2, a versão usada para salvar o SVM).
+# Revisão 2026.09.23-1.
 --extra-index-url https://download.pytorch.org/whl/cpu
 streamlit==1.64.0
 torch==2.14.0+cpu
 transformers==4.57.6
 safetensors>=0.4.3,<1
 readability-lxml==0.9
+pandas>=2.2,<3
+scikit-learn==1.5.2
+joblib>=1.4,<2

@@ -1,58 +1,30 @@
-﻿# TCC — Classificação de notícias com BERTimbau
+﻿# TCC — Comparação SVM + BERTimbau
 
-Site em Streamlit que recebe o título e o texto de uma notícia e mostra a classificação **Verdadeira** ou **Falsa**, com os percentuais atribuídos pelo BERTimbau a cada classe.
+O site usa as mesmas funções de previsão e a mesma normalização de `testar_noticias.py`. A opção inicial é **Comparar os dois modelos**. Cada resultado identifica o modelo e a interface informa quando eles discordam. Também é possível escolher SVM ou BERTimbau separadamente.
 
-Escolha **Usar um link**, cole o endereço público e clique em **Ler link e analisar**. O site extrai o título e o texto, mostra o conteúdo encontrado e executa a classificação automaticamente. A opção **Colar título e texto** continua disponível.
+O título é opcional. O SVM mostra sua margem de decisão, sem convertê-la em porcentagem. O BERTimbau mostra os escores com casas decimais suficientes para evitar arredondamento para 100%. A classificação é uma previsão estatística e pode errar; os escores não comprovam os fatos.
 
-A interface tem áreas de entrada e resultado, gráfico circular para a classe prevista e uma barra comparativa das pontuações. O estilo está em `web/estilo.css`, com ajustes para telas menores. O aviso sobre os limites do modelo fica abaixo da análise.
+## Publicação
 
-Links de mensagens privadas, páginas com login, paywall ou conteúdo carregado por JavaScript podem não ser lidos. A extração é automática e pode incluir trechos incorretos; confira o conteúdo mostrado. PDFs, imagens e vídeos não são aceitos. A análise continua limitada ao início do texto, conforme o modelo treinado.
+Use **Python 3.13**, repositório `Pedro-M-R/tcc` e arquivo principal `web/app.py`. Esta atualização está na branch `corrigir-comparacao-streamlit`. O SVM exige scikit-learn 1.5.2, a versão usada para salvar o modelo. Antes de substituir uma instalação em Python 3.14, consulte [PUBLICAR_STREAMLIT.md](PUBLICAR_STREAMLIT.md).
 
-### Links de checagem
-
-Quando uma página do Boatos.org contém uma alegação identificada e um selo explícito na seção **Conclusão**, o site mostra **a conclusão publicada pela fonte** com um link para a checagem. Essa conclusão não recebe um percentual de confiança inventado. O domínio, sozinho, nunca determina o resultado.
-
-A previsão do BERTimbau para o texto da página fica separada em **Ver previsão do BERTimbau para o texto da checagem**. Se os rótulos diferirem, a interface avisa sobre a divergência. O modelo não foi retreinado e pode continuar errando; classificar o estilo de um artigo de checagem não equivale a verificar a alegação citada nele. Outros links e textos colados continuam usando a previsão do modelo.
-
-**É apenas um modelo de inteligência artificial e pode errar.** Os percentuais são escores do modelo, não uma garantia de veracidade. Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.
-
-Pontuações que seriam arredondadas a 100,0% ou 0,0% aparecem como **>99,9%** ou **<0,1%**. Isso muda somente a formatação; a classe e as probabilidades originais são preservadas. Em **Conferir o que o modelo analisou**, veja os valores originais, o trecho reconstruído da entrada e a quantidade de tokens lidos. Pontuações altas podem ocorrer em previsões erradas; este ajuste não calibra nem retreina o modelo.
-
-O rodapé identifica a revisão instalada. A revisão de diagnóstico é **2026.09.22-3**. A configuração permite detectar atualizações do código; se uma publicação antiga persistir, reinicie o aplicativo pelo painel do Streamlit.
-
-## Publicar no Streamlit
-
-1. Entre em [Streamlit Community Cloud](https://share.streamlit.io/) e clique em **Create app**.
-2. Escolha **Yup, I have an app** e preencha:
-   - **Repository:** `Pedro-M-R/tcc`
-   - **Branch:** `main`
-   - **Main file path:** `web/app.py`
-3. Em **Advanced settings**, selecione **Python 3.14**. As dependências também são compatíveis com Python 3.11 a 3.13.
-4. Clique em **Deploy** e aguarde a instalação das dependências e o carregamento do modelo.
-
-Também é possível usar **Paste GitHub URL** com `https://github.com/Pedro-M-R/tcc/blob/main/web/app.py`.
-
-As dependências estão em `web/requirements.txt`. Não são necessários secrets ou acesso a banco de dados. O modelo usa CPU e é carregado na primeira análise. A disponibilidade de memória e o funcionamento na nuvem devem ser verificados nos logs após a publicação.
+O rodapé desta versão mostra **Revisão 2026.09.23-1**. Os modelos finais ficam em `modelos/svm` e `modelos/bertimbau_128_es`; os pesos do BERTimbau continuam no Git LFS. Não publique CSV, banco de dados ou checkpoints.
 
 ## Executar localmente
 
-Instale Python 3.11 a 3.14, Git e Git LFS. No terminal:
-
-```bash
-git clone https://github.com/Pedro-M-R/tcc.git
-cd tcc
-git lfs install
-git lfs pull
+```powershell
 python -m pip install -r web/requirements.txt
 python -m streamlit run web/app.py
 ```
 
-Abra `http://localhost:8501`. No Windows, após instalar as dependências, também pode usar `abrir_site.cmd`.
+Abra `http://localhost:8501`. Os modelos são carregados na primeira análise e reutilizados em memória. O BERTimbau lê os primeiros 128 tokens, como no treinamento; o site mostra quando houve truncamento e permite conferir o trecho analisado.
 
-## Modelo
+A opção **Usar um link** extrai título e texto de uma página pública. Quando há uma conclusão explícita em uma checagem do Boatos.org, ela aparece com atribuição à fonte, separada das previsões dos modelos sobre o texto do artigo.
 
-Usa exclusivamente o BERTimbau ajustado, salvo em `modelos/bertimbau_128_es`. Os pesos de aproximadamente 436 MB estão versionados com **Git LFS**, compatível com o Streamlit Community Cloud. A base de treinamento, o SVM e os checkpoints intermediários não são necessários para executar este site.
+## Validação
 
-O modelo lê até 128 tokens, conforme o treinamento; o site avisa quando considera apenas o título e o início do texto. A aplicação não grava as notícias em arquivos ou banco de dados.
+```powershell
+python -m unittest test_apresentacao test_site test_checagem test_links -v
+```
 
-Referências: [publicação no Streamlit](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy), [organização dos arquivos e suporte a Git LFS](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/file-organization).
+Os 25 testes do site passaram com Streamlit 1.64.0. A validação local com modelos reais comparou 27 entradas nos dois modelos e encontrou as mesmas classes e escores da janela. A base usada nessa verificação não é publicada. O teste adicional `test_paridade.py` só roda quando a base e a divisão local estão presentes.

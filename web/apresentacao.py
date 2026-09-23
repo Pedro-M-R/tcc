@@ -1,13 +1,10 @@
-"""Formatação das pontuações sem arredondá-las para certeza absoluta."""
+"""Mesma formatação de escores usada no relatório da janela local."""
 
-import math
+import sys
+from pathlib import Path
 
+RAIZ = Path(__file__).resolve().parents[1]
+if str(RAIZ) not in sys.path:
+    sys.path.insert(0, str(RAIZ))
 
-def formatar_probabilidade(probabilidade):
-    if not math.isfinite(probabilidade) or not 0 <= probabilidade <= 1:
-        raise ValueError("Probabilidade inválida retornada pelo modelo.")
-    if probabilidade >= 0.9995:
-        return ">99,9%"
-    if probabilidade <= 0.0005:
-        return "<0,1%"
-    return f"{probabilidade * 100:.1f}%".replace(".", ",")
+from pontuacoes import formatar_probabilidade

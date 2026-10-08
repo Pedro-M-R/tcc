@@ -3,10 +3,10 @@
   "acuracia_sem_abstencao": 0.944337811900192,
   "f1_macro_sem_abstencao": 0.9440241553052756,
   "brier_multiclasse": 0.08681143488126708,
-  "aceitos": 745,
-  "abstencoes": 297,
-  "cobertura": 0.7149712092130518,
-  "acuracia_aceitos": 0.9530201342281879,
+  "aceitos": 550,
+  "abstencoes": 492,
+  "cobertura": 0.527831094049904,
+  "acuracia_aceitos": 0.96,
   "ordem_classes": [
     "fake",
     "true"

@@ -6,15 +6,13 @@
   ],
   "limiares": [
     0.5,
-    0.5577417743796615
+    0.5
   ],
   "calibracao": "Regressão logística sobre a margem do SVM; somente partição de calibração",
   "dominio": {
-    "metodo": "TF-IDF por trechos; referência só do treino; percentil 2 da validação",
-    "piso_similaridade": 0.0,
-    "piso_cobertura": 0.35,
+    "metodo": "TF-IDF por trechos; referência só do treino; percentil 2 da validação com pisos fixos",
     "referencias_treino": 4821,
-    "limiar_similaridade": 0.08658081693357697,
+    "limiar_similaridade": 0.15,
     "limiar_cobertura": 0.8899889988998899,
     "nota": "Filtro de familiaridade lexical; não comprova fatos nem identifica todo texto inadequado."
   },
@@ -22,14 +20,14 @@
   "minimo_selecao": 30,
   "detalhes_selecao": [
     {
-      "aceitos": 437,
-      "acertos": 415,
-      "limite_inferior_wilson": 0.9249544100228201
+      "aceitos": 310,
+      "acertos": 295,
+      "limite_inferior_wilson": 0.9217089849746598
     },
     {
-      "aceitos": 366,
-      "acertos": 341,
-      "limite_inferior_wilson": 0.9011111031115537
+      "aceitos": 273,
+      "acertos": 257,
+      "limite_inferior_wilson": 0.9069274543851766
     }
   ],
   "nota": "Escores calibrados na amostra; não são probabilidades de verdade factual."

@@ -1,0 +1,11 @@
+{
+  "python": "3.13.2",
+  "bibliotecas": {
+    "scikit-learn": "1.8.0",
+    "numpy": "2.2.2",
+    "scipy": "1.16.2",
+    "pandas": "2.2.3",
+    "joblib": "1.5.2"
+  },
+  "duracao_segundos": 139.88731439999538
+}

@@ -1,0 +1,53 @@
+{
+  "melhor": {
+    "atributos": "palavras+caracteres",
+    "C": 1.0,
+    "f1_macro_validacao": 0.9393240124881227,
+    "convergiu": true,
+    "dimensoes": 100000
+  },
+  "candidatos": [
+    {
+      "atributos": "palavras",
+      "C": 0.25,
+      "f1_macro_validacao": 0.9276448144294138,
+      "convergiu": true,
+      "dimensoes": 60000
+    },
+    {
+      "atributos": "palavras",
+      "C": 1.0,
+      "f1_macro_validacao": 0.9344461697722568,
+      "convergiu": true,
+      "dimensoes": 60000
+    },
+    {
+      "atributos": "palavras",
+      "C": 4.0,
+      "f1_macro_validacao": 0.926794039201779,
+      "convergiu": true,
+      "dimensoes": 60000
+    },
+    {
+      "atributos": "palavras+caracteres",
+      "C": 0.25,
+      "f1_macro_validacao": 0.9315637669547249,
+      "convergiu": true,
+      "dimensoes": 100000
+    },
+    {
+      "atributos": "palavras+caracteres",
+      "C": 1.0,
+      "f1_macro_validacao": 0.9393240124881227,
+      "convergiu": true,
+      "dimensoes": 100000
+    },
+    {
+      "atributos": "palavras+caracteres",
+      "C": 4.0,
+      "f1_macro_validacao": 0.9393080962255176,
+      "convergiu": true,
+      "dimensoes": 100000
+    }
+  ]
+}

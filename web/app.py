@@ -6,21 +6,22 @@ from pathlib import Path
 
 import streamlit as st
 
-from inferencia import Classificador, caminho_modelo
+from inferencia import Classificador, modelos_do_site
 from extrair_link import ErroLink, extrair_noticia
 from apresentacao import formatar_probabilidade
+from triagem_noticias import INDICIOS, avaliar_entrada
 
 
 st.set_page_config(page_title="Notícia em análise", page_icon="📰", layout="wide")
 
 
 @st.cache_resource(show_spinner=False)
-def carregar_modelo(caminho):
-    return Classificador(caminho)
+def carregar_modelo(caminho, tipo):
+    return Classificador(caminho, tipo)
 
 
 def mostrar_checagem(checagem):
-    rotulo = "Alegação falsa" if checagem["rotulo"] == "fake" else "Alegação verdadeira"
+    rotulo = "A fonte contesta a alegação" if checagem["rotulo"] == "fake" else "A fonte sustenta a alegação"
     classe = "falsa" if checagem["rotulo"] == "fake" else "verdadeira"
     st.markdown(
         f'<section class="resultado {classe}" role="status"><div>'
@@ -31,49 +32,53 @@ def mostrar_checagem(checagem):
     st.text(checagem["alegacao"])
     st.link_button("Ler a checagem no Boatos.org", checagem["url"])
     st.caption("O resultado acima foi extraído do selo de conclusão da página. "
-               "A pontuação do BERTimbau, quando disponível abaixo, se refere ao texto da checagem.")
+               "As previsões dos modelos abaixo se referem ao texto da checagem.")
 
 
-def mostrar_resultado(resultado):
-    verdadeira = resultado["rotulo"] == "true"
-    classe = "verdadeira" if verdadeira else "falsa"
-    rotulo = "Verdadeira" if verdadeira else "Falsa"
-    prob_true = resultado["probabilidades"]["true"] * 100
-    prob_fake = resultado["probabilidades"]["fake"] * 100
-    destaque = prob_true if verdadeira else prob_fake
-    percentual = escape(formatar_probabilidade(resultado["probabilidades"][resultado["rotulo"]]))
+def mostrar_resultado(resultado, nome="TF-IDF + SVM"):
+    st.subheader(nome)
+    rotulo = resultado["rotulo"]
+    if rotulo == "inconclusivo":
+        st.warning("Análise inconclusiva")
+        st.write(resultado["motivo"])
+        return
+    classe = "verdadeira" if rotulo == "true" else "falsa"
     st.markdown(
         f'<section class="resultado {classe}" role="status">'
-        f'<div><p>Classificação do modelo</p><h2>{rotulo}</h2>'
-        '<p class="nota">Resultado baseado nos padrões do texto.</p></div>'
-        f'<div class="anel" style="--angulo:{destaque * 3.6:.3f}deg" '
-        f'role="img" aria-label="Pontuação para {rotulo}: {percentual}">'
-        f'<div class="anel-centro"><strong>{percentual}</strong><small>PARA {rotulo.upper()}</small></div>'
-        '</div></section>', unsafe_allow_html=True,
-    )
-    st.caption("Distribuição da pontuação entre as duas classes")
-    st.markdown(
-        '<div class="distribuicao" aria-hidden="true">'
-        f'<span class="barra-true" style="width:{prob_true:.4f}%"></span>'
-        f'<span class="barra-fake" style="width:{prob_fake:.4f}%"></span></div>',
+        f'<div><p>Indícios identificados pelo modelo</p><h2>{INDICIOS[rotulo]}</h2>'
+        '<p class="nota">Padrões do texto; os fatos não foram verificados.</p></div></section>',
         unsafe_allow_html=True,
     )
-    coluna_true, coluna_fake = st.columns(2)
-    coluna_true.metric("Verdadeira", formatar_probabilidade(resultado["probabilidades"]["true"]))
-    coluna_fake.metric("Falsa", formatar_probabilidade(resultado["probabilidades"]["fake"]))
-    st.caption("Os percentuais representam a pontuação atribuída pelo modelo a cada classe. "
-               "Eles não medem quanto da notícia foi comprovado nem garantem a chance real de ela ser verdadeira.")
-    if resultado["truncado"]:
-        st.caption("Esta notícia ultrapassa o tamanho de leitura do modelo. "
-                   "O resultado considera o título e o início do texto.")
-    if resultado.get("trecho_lido"):
-        with st.expander("Conferir o que o modelo analisou"):
-            st.caption(f"Foram lidos {resultado['tokens_lidos']} de {resultado['tokens_totais']} tokens "
-                       "(partes de palavras, incluindo marcadores do modelo).")
-            st.text(resultado["trecho_lido"])
-            st.caption("Trecho reconstruído a partir da entrada do modelo; os espaços podem diferir do original.")
-            st.caption("Pontuações com mais casas decimais, sem calibração de confiança:")
-            st.json(resultado["probabilidades"])
+    st.caption("Esses indícios são padrões aprendidos na base de treinamento. "
+               "Confira a fonte, a data e outras coberturas antes de concluir.")
+    with st.expander("Detalhes técnicos do modelo"):
+        if "margem_svm" in resultado:
+            st.metric("Margem de decisão do SVM", f"{resultado['margem_svm']:+.4f}".replace(".", ","))
+            st.caption("Margem positiva favorece indícios favoráveis; negativa, indícios contrários. "
+                       "Não é uma probabilidade de veracidade.")
+        else:
+            st.caption("Escores calibrados na amostra de avaliação; não comprovam os fatos." if resultado.get("calibrado")
+                       else "Escores softmax não calibrados; não representam a chance de a notícia ser verdadeira.")
+            a, b = st.columns(2)
+            a.metric("Escore técnico · indícios favoráveis", formatar_probabilidade(resultado["probabilidades"]["true"]))
+            b.metric("Escore técnico · indícios contrários", formatar_probabilidade(resultado["probabilidades"]["fake"]))
+            if resultado.get("truncado"):
+                st.caption("Esta notícia ultrapassa o tamanho de leitura do modelo. "
+                           "O resultado considera o título e o início do texto.")
+            if resultado.get("trecho_lido"):
+                st.caption(f"Foram lidos {resultado['tokens_lidos']} de {resultado['tokens_totais']} tokens.")
+                st.text(resultado["trecho_lido"])
+
+
+def mostrar_comparacao(resultados):
+    if len(resultados) > 1:
+        if len({r["rotulo"] for _, r in resultados}) == 1:
+            st.info("Os modelos apontam os mesmos indícios; isso não comprova os fatos.")
+        else:
+            st.warning("Os modelos discordam. Confira os resultados de cada um e verifique as fontes.")
+    for modelo, resultado in resultados:
+        mostrar_resultado(resultado, modelo["nome"])
+        st.caption(f"Modelo utilizado: {Path(modelo['caminho']).name}")
 
 
 st.markdown(Path(__file__).with_name("estilo.css").read_text(encoding="utf-8-sig"), unsafe_allow_html=True)
@@ -84,7 +89,7 @@ st.markdown('''
   <div><p class="sobretitulo">LEITURA CRÍTICA · INTELIGÊNCIA ARTIFICIAL</p>
   <h1>Antes de compartilhar,<br><span>olhe mais de perto.</span></h1>
   <p class="descricao">Um link ou um texto. Uma nova perspectiva sobre a notícia.
-  Explore a classificação da inteligência artificial e tire suas próprias conclusões.</p></div>
+  Explore os indícios identificados pela inteligência artificial e confira as fontes.</p></div>
   <div class="ilustracao" aria-hidden="true"><div class="orbita"></div>
     <div class="folha"><div class="folha-topo"></div><div class="folha-linha titulo"></div>
     <div class="folha-linha titulo curta"></div><div class="folha-linha"></div>
@@ -106,9 +111,18 @@ with coluna_entrada, st.container(border=True, key="painel_entrada"):
                 '<p class="painel-subtitulo">Escolha como enviar o conteúdo para análise.</p>', unsafe_allow_html=True)
     modo = st.radio("Como você quer analisar?", ["Colar título e texto", "Usar um link"],
                     horizontal=True, label_visibility="collapsed")
+    modelos = modelos_do_site()
+    opcoes = {"Comparar os dois modelos": modelos} if len(modelos) > 1 else {}
+    opcoes.update({m["nome"]: [m] for m in modelos})
+    selecao = st.selectbox("Modelos para análise", list(opcoes))
+    if len(modelos) == 1 and modelos[0]["tipo"] == "svm_leve":
+        st.caption("Análise com TF-IDF + SVM, executada em CPU.")
+    elif len(modelos) < 2 and modelos[0]["tipo"] not in {"local", "svm", "svm_leve"}:
+        st.warning("O SVM não está disponível nesta instalação. Inclua modelos/svm/modelo.joblib "
+                   "para comparar os dois modelos, como no testar_noticias.")
     if modo == "Colar título e texto":
         with st.form("noticia"):
-            titulo = st.text_input("Título da notícia", placeholder="Qual é a manchete?", max_chars=500)
+            titulo = st.text_input("Título da notícia (opcional)", placeholder="Qual é a manchete?", max_chars=500)
             texto = st.text_area("Texto da notícia", placeholder="Cole o conteúdo que você quer analisar…",
                                  height=220, max_chars=30000)
             enviar = st.form_submit_button("Analisar notícia", type="primary", use_container_width=True)
@@ -143,39 +157,48 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
     if erro_link:
         st.warning(erro_link)
     elif enviar:
-        if not titulo.strip() or not texto.strip():
-            st.warning("Preencha o título e o texto da notícia para continuar.")
+        if not (titulo.strip() or texto.strip()):
+            st.warning("Cole o texto da notícia ou informe um título para continuar.")
+        elif motivo := avaliar_entrada(titulo, texto):
+            st.warning("Análise inconclusiva")
+            st.write(motivo)
+            st.caption("Nenhum escore de veracidade foi atribuído. A triagem usa regras de tamanho e conteúdo e também pode falhar.")
         else:
             checagem = noticia_extraida.get("checagem") if noticia_extraida else None
             if checagem:
                 mostrar_checagem(checagem)
-            try:
-                with st.spinner("Analisando a notícia… O primeiro acesso pode levar alguns instantes."):
-                    classificador = carregar_modelo(str(caminho_modelo()))
-                    resultado = classificador.analisar(titulo, texto)
-            except Exception:
-                logging.getLogger(__name__).exception("Não foi possível executar o BERTimbau.")
-                st.error("Não foi possível analisar agora. Tente novamente em instantes. "
-                         "Se o problema continuar, avise o responsável pelo site.")
-            else:
+            resultados = []
+            with st.spinner("Analisando a notícia… O primeiro acesso pode levar alguns instantes."):
+                for modelo in opcoes[selecao]:
+                    try:
+                        classificador = carregar_modelo(modelo["caminho"], modelo["tipo"])
+                        resultados.append((modelo, classificador.analisar(titulo, texto)))
+                    except Exception:
+                        logging.getLogger(__name__).exception("Não foi possível executar %s.", modelo["nome"])
+                        st.error(f"Não foi possível analisar com {modelo['nome']}. "
+                                 "Tente novamente em instantes ou avise o responsável pelo site.")
+            if len(resultados) != len(opcoes[selecao]) and resultados:
+                st.warning("Comparação incompleta: um dos modelos não pôde ser executado.")
+            if resultados:
                 if checagem:
-                    if resultado["rotulo"] != checagem["rotulo"]:
-                        st.warning("A previsão do BERTimbau diverge da conclusão da fonte. "
-                                   "O modelo avaliou o texto da checagem e não verificou os fatos da alegação.")
-                    with st.expander("Ver previsão do BERTimbau para o texto da checagem"):
-                        mostrar_resultado(resultado)
+                    if any(r["rotulo"] != checagem["rotulo"] for _, r in resultados):
+                        st.warning("Uma previsão dos modelos diverge da conclusão da fonte. "
+                                   "Os modelos avaliaram o texto da checagem e não verificaram os fatos da alegação.")
+                    with st.container(border=True):
+                        st.caption("Indícios dos modelos para o texto da checagem")
+                        mostrar_comparacao(resultados)
                 else:
-                    mostrar_resultado(resultado)
+                    mostrar_comparacao(resultados)
     else:
         st.markdown('''<div class="vazio"><div class="vazio-icone" aria-hidden="true"><span>◎</span></div>
         <h3>Todo resultado começa<br>com uma boa leitura.</h3>
-        <p>Envie uma notícia para análise. A classificação e as pontuações do modelo vão aparecer aqui.</p></div>
-        <div class="vazio-legenda"><span><i class="ponto"></i>Verdadeira</span>
-        <span><i class="ponto coral"></i>Falsa</span></div>''', unsafe_allow_html=True)
+        <p>Envie uma notícia para análise. Os indícios encontrados ou uma orientação para completar o texto vão aparecer aqui.</p></div>
+        <div class="vazio-legenda"><span><i class="ponto"></i>Indícios favoráveis</span>
+        <span><i class="ponto coral"></i>Indícios contrários</span></div>''', unsafe_allow_html=True)
 
 with st.container(key="aviso_modelo"):
     st.info("Este é apenas um modelo de inteligência artificial e pode errar. "
-            "Não considere o resultado 100% certo, mesmo quando o percentual for alto. "
+            "Não considere o resultado 100% certo. A análise pode ser inconclusiva quando falta contexto ou suporte do modelo. "
             "Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.")
 st.markdown('<div class="rodape"><span>Notícia em análise · Projeto acadêmico</span>'
-            '<span>BERTimbau · Revisão 2026.09.22-3</span></div>', unsafe_allow_html=True)
+            '<span>TF-IDF + SVM · Revisão 2026.10.08-svm</span></div>', unsafe_allow_html=True)

@@ -1,1 +1,2 @@
-modelos/bertimbau_128_es/model.safetensors filter=lfs diff=lfs merge=lfs -text
+# O site leve nao usa pesos Git LFS.
+*.joblib binary

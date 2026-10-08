@@ -1,6 +1,8 @@
 @echo off
 cd /d "%~dp0"
-if exist ".venv-site\Scripts\python.exe" (
+if exist ".venv-svm\Scripts\python.exe" (
+    ".venv-svm\Scripts\python.exe" -m streamlit run web/app.py
+) else if exist ".venv-site\Scripts\python.exe" (
     ".venv-site\Scripts\python.exe" -m streamlit run web/app.py
 ) else (
     python -m streamlit run web/app.py

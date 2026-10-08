@@ -1,53 +1,631 @@
 {
   "melhor": {
-    "atributos": "palavras+caracteres",
-    "C": 1.0,
-    "f1_macro_validacao": 0.9393240124881227,
+    "atributos": "caracteres",
+    "config": {
+      "nome": "caracteres",
+      "palavras": 100000,
+      "ordem_palavras": 2,
+      "caracteres": 250000,
+      "ordem_caracteres": [
+        2,
+        5
+      ],
+      "peso_caracteres": 0.75
+    },
+    "C": 10.0,
+    "class_weight": "balanced",
+    "f1_macro_validacao": 0.9576495168065675,
     "convergiu": true,
-    "dimensoes": 100000
+    "dimensoes": 176684
   },
   "candidatos": [
     {
-      "atributos": "palavras",
+      "atributos": "referencia",
+      "config": {
+        "nome": "referencia",
+        "palavras": 60000,
+        "ordem_palavras": 2,
+        "caracteres": 40000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 0.5
+      },
       "C": 0.25,
-      "f1_macro_validacao": 0.9276448144294138,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.935454642017614,
       "convergiu": true,
-      "dimensoes": 60000
+      "dimensoes": 100000
     },
     {
-      "atributos": "palavras",
+      "atributos": "referencia",
+      "config": {
+        "nome": "referencia",
+        "palavras": 60000,
+        "ordem_palavras": 2,
+        "caracteres": 40000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 0.5
+      },
       "C": 1.0,
-      "f1_macro_validacao": 0.9344461697722568,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.9393394724087794,
       "convergiu": true,
-      "dimensoes": 60000
+      "dimensoes": 100000
     },
     {
-      "atributos": "palavras",
+      "atributos": "referencia",
+      "config": {
+        "nome": "referencia",
+        "palavras": 60000,
+        "ordem_palavras": 2,
+        "caracteres": 40000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 0.5
+      },
       "C": 4.0,
-      "f1_macro_validacao": 0.926794039201779,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.9393394724087794,
       "convergiu": true,
-      "dimensoes": 60000
+      "dimensoes": 100000
     },
     {
-      "atributos": "palavras+caracteres",
+      "atributos": "referencia",
+      "config": {
+        "nome": "referencia",
+        "palavras": 60000,
+        "ordem_palavras": 2,
+        "caracteres": 40000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 0.5
+      },
+      "C": 10.0,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.9383688121371486,
+      "convergiu": true,
+      "dimensoes": 100000
+    },
+    {
+      "atributos": "referencia",
+      "config": {
+        "nome": "referencia",
+        "palavras": 60000,
+        "ordem_palavras": 2,
+        "caracteres": 40000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 0.5
+      },
       "C": 0.25,
-      "f1_macro_validacao": 0.9315637669547249,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9353820660983552,
       "convergiu": true,
       "dimensoes": 100000
     },
     {
-      "atributos": "palavras+caracteres",
+      "atributos": "referencia",
+      "config": {
+        "nome": "referencia",
+        "palavras": 60000,
+        "ordem_palavras": 2,
+        "caracteres": 40000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 0.5
+      },
       "C": 1.0,
-      "f1_macro_validacao": 0.9393240124881227,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9383688121371486,
       "convergiu": true,
       "dimensoes": 100000
     },
     {
-      "atributos": "palavras+caracteres",
+      "atributos": "referencia",
+      "config": {
+        "nome": "referencia",
+        "palavras": 60000,
+        "ordem_palavras": 2,
+        "caracteres": 40000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 0.5
+      },
       "C": 4.0,
-      "f1_macro_validacao": 0.9393080962255176,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9383688121371486,
       "convergiu": true,
       "dimensoes": 100000
+    },
+    {
+      "atributos": "referencia",
+      "config": {
+        "nome": "referencia",
+        "palavras": 60000,
+        "ordem_palavras": 2,
+        "caracteres": 40000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 0.5
+      },
+      "C": 10.0,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9373977906623487,
+      "convergiu": true,
+      "dimensoes": 100000
+    },
+    {
+      "atributos": "amplo",
+      "config": {
+        "nome": "amplo",
+        "palavras": 150000,
+        "ordem_palavras": 2,
+        "caracteres": 150000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 1.0
+      },
+      "C": 0.25,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.947042396547347,
+      "convergiu": true,
+      "dimensoes": 225243
+    },
+    {
+      "atributos": "amplo",
+      "config": {
+        "nome": "amplo",
+        "palavras": 150000,
+        "ordem_palavras": 2,
+        "caracteres": 150000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 1.0
+      },
+      "C": 1.0,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.9431764561396705,
+      "convergiu": true,
+      "dimensoes": 225243
+    },
+    {
+      "atributos": "amplo",
+      "config": {
+        "nome": "amplo",
+        "palavras": 150000,
+        "ordem_palavras": 2,
+        "caracteres": 150000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 1.0
+      },
+      "C": 4.0,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.947042396547347,
+      "convergiu": true,
+      "dimensoes": 225243
+    },
+    {
+      "atributos": "amplo",
+      "config": {
+        "nome": "amplo",
+        "palavras": 150000,
+        "ordem_palavras": 2,
+        "caracteres": 150000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 1.0
+      },
+      "C": 10.0,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.9479852383802114,
+      "convergiu": true,
+      "dimensoes": 225243
+    },
+    {
+      "atributos": "amplo",
+      "config": {
+        "nome": "amplo",
+        "palavras": 150000,
+        "ordem_palavras": 2,
+        "caracteres": 150000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 1.0
+      },
+      "C": 0.25,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9431615504334212,
+      "convergiu": true,
+      "dimensoes": 225243
+    },
+    {
+      "atributos": "amplo",
+      "config": {
+        "nome": "amplo",
+        "palavras": 150000,
+        "ordem_palavras": 2,
+        "caracteres": 150000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 1.0
+      },
+      "C": 1.0,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9431615504334212,
+      "convergiu": true,
+      "dimensoes": 225243
+    },
+    {
+      "atributos": "amplo",
+      "config": {
+        "nome": "amplo",
+        "palavras": 150000,
+        "ordem_palavras": 2,
+        "caracteres": 150000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 1.0
+      },
+      "C": 4.0,
+      "class_weight": null,
+      "f1_macro_validacao": 0.945088277537373,
+      "convergiu": true,
+      "dimensoes": 225243
+    },
+    {
+      "atributos": "amplo",
+      "config": {
+        "nome": "amplo",
+        "palavras": 150000,
+        "ordem_palavras": 2,
+        "caracteres": 150000,
+        "ordem_caracteres": [
+          3,
+          5
+        ],
+        "peso_caracteres": 1.0
+      },
+      "C": 10.0,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9470150046413248,
+      "convergiu": true,
+      "dimensoes": 225243
+    },
+    {
+      "atributos": "contexto",
+      "config": {
+        "nome": "contexto",
+        "palavras": 200000,
+        "ordem_palavras": 3,
+        "caracteres": 200000,
+        "ordem_caracteres": [
+          3,
+          6
+        ],
+        "peso_caracteres": 0.5
+      },
+      "C": 0.25,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.9354193293798108,
+      "convergiu": true,
+      "dimensoes": 327090
+    },
+    {
+      "atributos": "contexto",
+      "config": {
+        "nome": "contexto",
+        "palavras": 200000,
+        "ordem_palavras": 3,
+        "caracteres": 200000,
+        "ordem_caracteres": [
+          3,
+          6
+        ],
+        "peso_caracteres": 0.5
+      },
+      "C": 1.0,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.9422058204224572,
+      "convergiu": true,
+      "dimensoes": 327090
+    },
+    {
+      "atributos": "contexto",
+      "config": {
+        "nome": "contexto",
+        "palavras": 200000,
+        "ordem_palavras": 3,
+        "caracteres": 200000,
+        "ordem_caracteres": [
+          3,
+          6
+        ],
+        "peso_caracteres": 0.5
+      },
+      "C": 4.0,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.9412797313872817,
+      "convergiu": true,
+      "dimensoes": 327090
+    },
+    {
+      "atributos": "contexto",
+      "config": {
+        "nome": "contexto",
+        "palavras": 200000,
+        "ordem_palavras": 3,
+        "caracteres": 200000,
+        "ordem_caracteres": [
+          3,
+          6
+        ],
+        "peso_caracteres": 0.5
+      },
+      "C": 10.0,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.9412652034434212,
+      "convergiu": true,
+      "dimensoes": 327090
+    },
+    {
+      "atributos": "contexto",
+      "config": {
+        "nome": "contexto",
+        "palavras": 200000,
+        "ordem_palavras": 3,
+        "caracteres": 200000,
+        "ordem_caracteres": [
+          3,
+          6
+        ],
+        "peso_caracteres": 0.5
+      },
+      "C": 0.25,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9324581853167555,
+      "convergiu": true,
+      "dimensoes": 327090
+    },
+    {
+      "atributos": "contexto",
+      "config": {
+        "nome": "contexto",
+        "palavras": 200000,
+        "ordem_palavras": 3,
+        "caracteres": 200000,
+        "ordem_caracteres": [
+          3,
+          6
+        ],
+        "peso_caracteres": 0.5
+      },
+      "C": 1.0,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9402634593356243,
+      "convergiu": true,
+      "dimensoes": 327090
+    },
+    {
+      "atributos": "contexto",
+      "config": {
+        "nome": "contexto",
+        "palavras": 200000,
+        "ordem_palavras": 3,
+        "caracteres": 200000,
+        "ordem_caracteres": [
+          3,
+          6
+        ],
+        "peso_caracteres": 0.5
+      },
+      "C": 4.0,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9393394724087794,
+      "convergiu": true,
+      "dimensoes": 327090
+    },
+    {
+      "atributos": "contexto",
+      "config": {
+        "nome": "contexto",
+        "palavras": 200000,
+        "ordem_palavras": 3,
+        "caracteres": 200000,
+        "ordem_caracteres": [
+          3,
+          6
+        ],
+        "peso_caracteres": 0.5
+      },
+      "C": 10.0,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9402947867578627,
+      "convergiu": true,
+      "dimensoes": 327090
+    },
+    {
+      "atributos": "caracteres",
+      "config": {
+        "nome": "caracteres",
+        "palavras": 100000,
+        "ordem_palavras": 2,
+        "caracteres": 250000,
+        "ordem_caracteres": [
+          2,
+          5
+        ],
+        "peso_caracteres": 0.75
+      },
+      "C": 0.25,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.9489807502217366,
+      "convergiu": true,
+      "dimensoes": 176684
+    },
+    {
+      "atributos": "caracteres",
+      "config": {
+        "nome": "caracteres",
+        "palavras": 100000,
+        "ordem_palavras": 2,
+        "caracteres": 250000,
+        "ordem_caracteres": [
+          2,
+          5
+        ],
+        "peso_caracteres": 0.75
+      },
+      "C": 1.0,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.9518858176181866,
+      "convergiu": true,
+      "dimensoes": 176684
+    },
+    {
+      "atributos": "caracteres",
+      "config": {
+        "nome": "caracteres",
+        "palavras": 100000,
+        "ordem_palavras": 2,
+        "caracteres": 250000,
+        "ordem_caracteres": [
+          2,
+          5
+        ],
+        "peso_caracteres": 0.75
+      },
+      "C": 4.0,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.9566921614057815,
+      "convergiu": true,
+      "dimensoes": 176684
+    },
+    {
+      "atributos": "caracteres",
+      "config": {
+        "nome": "caracteres",
+        "palavras": 100000,
+        "ordem_palavras": 2,
+        "caracteres": 250000,
+        "ordem_caracteres": [
+          2,
+          5
+        ],
+        "peso_caracteres": 0.75
+      },
+      "C": 10.0,
+      "class_weight": "balanced",
+      "f1_macro_validacao": 0.9576495168065675,
+      "convergiu": true,
+      "dimensoes": 176684
+    },
+    {
+      "atributos": "caracteres",
+      "config": {
+        "nome": "caracteres",
+        "palavras": 100000,
+        "ordem_palavras": 2,
+        "caracteres": 250000,
+        "ordem_caracteres": [
+          2,
+          5
+        ],
+        "peso_caracteres": 0.75
+      },
+      "C": 0.25,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9489279573677466,
+      "convergiu": true,
+      "dimensoes": 176684
+    },
+    {
+      "atributos": "caracteres",
+      "config": {
+        "nome": "caracteres",
+        "palavras": 100000,
+        "ordem_palavras": 2,
+        "caracteres": 250000,
+        "ordem_caracteres": [
+          2,
+          5
+        ],
+        "peso_caracteres": 0.75
+      },
+      "C": 1.0,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9499494289532162,
+      "convergiu": true,
+      "dimensoes": 176684
+    },
+    {
+      "atributos": "caracteres",
+      "config": {
+        "nome": "caracteres",
+        "palavras": 100000,
+        "ordem_palavras": 2,
+        "caracteres": 250000,
+        "ordem_caracteres": [
+          2,
+          5
+        ],
+        "peso_caracteres": 0.75
+      },
+      "C": 4.0,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9576495168065675,
+      "convergiu": true,
+      "dimensoes": 176684
+    },
+    {
+      "atributos": "caracteres",
+      "config": {
+        "nome": "caracteres",
+        "palavras": 100000,
+        "ordem_palavras": 2,
+        "caracteres": 250000,
+        "ordem_caracteres": [
+          2,
+          5
+        ],
+        "peso_caracteres": 0.75
+      },
+      "C": 10.0,
+      "class_weight": null,
+      "f1_macro_validacao": 0.9576495168065675,
+      "convergiu": true,
+      "dimensoes": 176684
     }
   ]
 }

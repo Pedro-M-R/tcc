@@ -1,7 +1,0 @@
-{
-  "metodo": "TF-IDF por trechos; referência só do treino; percentil 2 da validação com pisos fixos",
-  "referencias_treino": 4821,
-  "limiar_similaridade": 0.15,
-  "limiar_cobertura": 0.8899889988998899,
-  "nota": "Filtro de familiaridade lexical; não comprova fatos nem identifica todo texto inadequado."
-}

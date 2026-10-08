@@ -34,7 +34,7 @@ publicação, incluindo o modelo, sem base de treinamento ou checkpoints.
    `web/requirements.txt`. Esse arquivo fica ao lado do app, conforme a
    [documentação de dependências](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/app-dependencies).
 4. Abra o app e confirme a única opção **TF-IDF + SVM** e o rodapé
-   **2026.10.08-svm2**. Faça uma análise; abrir a página inicial não basta para
+   **2026.10.08-svm3**. Faça uma análise; abrir a página inicial não basta para
    comprovar que o modelo carregou.
 
 Não use `requirements.txt` da raiz do projeto original para instalar o site:
@@ -44,7 +44,7 @@ O pacote leve usa `web/requirements.txt` e `requirements-svm.txt`.
 ## Modelo e configuração
 
 O carregamento padrão usa `modelos/svm_leve`. A pasta precisa conter
-`modelo.joblib`, `calibrador.joblib`, `dominio.joblib`, `politica_decisao.json`
+`modelo.joblib`, `calibrador.joblib`, `politica_decisao.json`
 e `concluido.json`. O pacote também inclui os relatórios e as versões de treino.
 Preserve os módulos Python e a estrutura de pastas do pacote.
 
@@ -53,8 +53,12 @@ Não há download de pesos ao abrir o site. `TCC_MODEL_PATH` e
 Para testar outro SVM treinado por `treinar_svm_leve.py`, configure
 `TCC_SVM_MODEL_PATH` com o caminho da pasta desse modelo.
 
-O resultado pode ser inconclusivo por falta de contexto, vocabulário fora do
-domínio ou escore abaixo do limiar. Isso não significa notícia falsa.
+O SVM classifica textos preenchidos em `fake` ou `true`, sem abstenção por
+tamanho, domínio ou limiar de confiança. Entradas vazias pedem preenchimento.
+Frases inteiras como “pedro eh bonito”, também repetidas no título e no texto,
+retornam “Falsa” pela regra explícita de opinião pessoal, sem escore e
+sem atribuir esse resultado ao treinamento do SVM. Uma notícia que apenas
+contenha essa frase continua sendo classificada pelo modelo.
 Se um link bloquear a extração, cole o corpo da notícia.
 
 Consulte [STREAMLIT_SVM.md](STREAMLIT_SVM.md) para métricas, limitações e retreino.

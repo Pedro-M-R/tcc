@@ -37,7 +37,7 @@ def modelos_do_site():
 def versao_modelo(caminho):
     """Invalida o cache quando pesos ou política são atualizados na mesma pasta."""
     versao = []
-    for nome in ("modelo.joblib", "calibrador.joblib", "dominio.joblib",
+    for nome in ("modelo.joblib", "calibrador.joblib",
                  "politica_decisao.json", "concluido.json"):
         try:
             estado = (Path(caminho) / nome).stat()

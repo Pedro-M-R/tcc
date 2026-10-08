@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 import numpy as np
 import pandas as pd
 
-from svm_leve import ModeloSVMLeve
+from svm_leve import ModeloSVMLeve, opiniao_pessoal
 from preparacao_noticias import preparar_noticia
 from web.inferencia import Classificador, modelos_do_site
 from test_triagem import NOTICIA
@@ -30,15 +30,31 @@ class TestSVMLeve(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "concluído"):
                 ModeloSVMLeve(pasta)
 
-    def test_abstencao_antes_de_classificar(self):
+    def test_texto_curto_nao_e_bloqueado_por_triagem_ou_limiar_antigo(self):
         modelo = ModeloSVMLeve.__new__(ModeloSVMLeve)
-        modelo.dominio = Mock()
+        modelo.politica = {"rotulos": ["fake", "true"], "limiares": [1.1, 1.1]}
+        modelo.escores = Mock(return_value=np.array([[.49, .51]]))
+        for titulo, texto in (("", "Olá"), ("Somente o título", ""), ("", NOTICIA)):
+            self.assertEqual(modelo.analisar_noticia(titulo, texto)['rotulo'], "true")
+        self.assertEqual(modelo.escores.call_count, 3)
+        with self.assertRaisesRegex(ValueError, "Digite"):
+            modelo.analisar_noticia(" ", " ")
+
+    def test_opiniao_inteira_e_regra_explicita_sem_escore_fabricado(self):
+        modelo = ModeloSVMLeve.__new__(ModeloSVMLeve)
         modelo.escores = Mock()
-        self.assertEqual(modelo.analisar_noticia("", "Olá")['rotulo'], "inconclusivo")
-        modelo.dominio.aceitar.assert_not_called()
-        modelo.dominio.aceitar.return_value = np.array([False])
-        self.assertEqual(modelo.analisar_noticia("", NOTICIA)['rotulo'], "inconclusivo")
+        for frase in ("pedro eh bonito", "pedro eh bonita", "O Pedro é bonito.", "Maria é linda", "João é muito bonito"):
+            with self.subTest(frase=frase):
+                r = modelo.analisar_noticia(frase, frase)
+                self.assertEqual(r["rotulo"], "fake")
+                self.assertEqual(r["origem"], "regra_opiniao")
+                self.assertNotIn("probabilidades", r)
         modelo.escores.assert_not_called()
+        for frase in ("Pedro não é bonito", "Pedro eh bonito?", "João disse Pedro é bonito",
+                      "Pedro eh bonito. O prefeito anunciou uma obra."):
+            self.assertFalse(opiniao_pessoal(frase, frase), frase)
+        self.assertFalse(opiniao_pessoal("Pedro eh bonito", NOTICIA))
+        self.assertFalse(opiniao_pessoal("Pedro eh bonito", "O hospital fechou ontem."))
 
     def test_carregamento_real_sem_torch(self):
         codigo = """
@@ -46,7 +62,7 @@ import sys
 from web.inferencia import Classificador
 m = Classificador(sys.argv[1])
 assert m.tipo == 'svm_leve'
-assert m.analisar('', 'Olá')['rotulo'] == 'inconclusivo'
+assert m.analisar('', 'Olá')['rotulo'] in ('fake', 'true')
 assert 'torch' not in sys.modules
 assert 'transformers' not in sys.modules
 assert 'prever' not in sys.modules
@@ -56,13 +72,37 @@ print('CPU OK')
         r = subprocess.run([sys.executable, "-c", codigo, str(MODELO)], cwd=RAIZ, capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stderr)
 
-    def test_filtro_corrigido_aceita_noticia_nova_e_rejeita_vocabulario_alheio(self):
+    def test_modelo_real_sempre_classifica_textos_preenchidos(self):
         modelo = ModeloSVMLeve(MODELO)
-        entrada = preparar_noticia("", NOTICIA)
-        self.assertTrue(modelo.dominio.aceitar([entrada])[0])
-        estranho = "galaxias unicornios dragao nebulosa abacaxi teletransporte " * 70
-        self.assertFalse(modelo.dominio.aceitar([estranho])[0])
-        self.assertFalse(modelo.dominio.aceitar([entrada + " " + estranho])[0])
+        for texto in (NOTICIA, "O prefeito anunciou uma obra.", "galaxias unicornios dragao nebulosa"):
+            r = modelo.analisar_noticia("", texto)
+            self.assertIn(r["rotulo"], ("fake", "true"))
+            self.assertEqual(r["origem"], "svm")
+            self.assertAlmostEqual(sum(r["probabilidades"].values()), 1.)
+
+    def test_streamlit_caso_pedro_e_texto_curto(self):
+        import streamlit as st
+        from streamlit.testing.v1 import AppTest
+        st.cache_resource.clear()
+        self.addCleanup(st.cache_resource.clear)
+        sys.path.insert(0, str(RAIZ / "web"))
+        app = AppTest.from_file(str(RAIZ / "web/app.py"), default_timeout=30).run()
+        app.text_input[0].set_value("pedro eh bonita")
+        app.text_area[0].set_value("pedro eh bonita")
+        app.button[0].click().run()
+        self.assertFalse(app.exception)
+        self.assertFalse(app.error)
+        self.assertFalse(app.warning)
+        self.assertTrue(any("<h2>Falsa</h2>" in m.value for m in app.markdown))
+        self.assertTrue(any("Não é uma previsão do SVM" in c.value for c in app.caption))
+        self.assertFalse(app.metric)
+        app.text_input[0].set_value("")
+        app.text_area[0].set_value("O prefeito anunciou uma obra.")
+        app.button[0].click().run()
+        self.assertFalse(app.exception)
+        self.assertFalse(app.error)
+        self.assertFalse(app.warning)
+        self.assertEqual(len(app.metric), 2)
 
     def test_cache_recarrega_apos_atualizar_artefatos_na_mesma_pasta(self):
         import streamlit as st

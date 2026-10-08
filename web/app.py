@@ -36,6 +36,13 @@ def mostrar_checagem(checagem):
 
 
 def mostrar_resultado(resultado, nome="TF-IDF + SVM"):
+    if resultado.get("origem") == "regra_opiniao":
+        st.subheader("Opinião pessoal")
+        st.markdown('<section class="resultado falsa" role="status"><div>'
+                    '<p>Resultado por regra do aplicativo</p><h2>Falsa</h2>'
+                    '</div></section>', unsafe_allow_html=True)
+        st.caption(resultado["motivo"])
+        return
     st.subheader(nome)
     rotulo = resultado["rotulo"]
     if rotulo == "inconclusivo":
@@ -159,7 +166,7 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
     elif enviar:
         if not (titulo.strip() or texto.strip()):
             st.warning("Cole o texto da notícia ou informe um título para continuar.")
-        elif motivo := avaliar_entrada(titulo, texto):
+        elif all(m["tipo"] != "svm_leve" for m in opcoes[selecao]) and (motivo := avaliar_entrada(titulo, texto)):
             st.warning("Análise inconclusiva")
             st.write(motivo)
             st.caption("Nenhum escore de veracidade foi atribuído. A triagem usa regras de tamanho e conteúdo e também pode falhar.")
@@ -198,7 +205,7 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
 
 with st.container(key="aviso_modelo"):
     st.info("Este é apenas um modelo de inteligência artificial e pode errar. "
-            "Não considere o resultado 100% certo. A análise pode ser inconclusiva quando falta contexto ou suporte do modelo. "
+            "Não considere o resultado 100% certo. A classificação é binária e pode errar, especialmente em textos curtos. "
             "Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.")
 st.markdown('<div class="rodape"><span>Notícia em análise · Projeto acadêmico</span>'
-            '<span>TF-IDF + SVM · Revisão 2026.10.08-svm2</span></div>', unsafe_allow_html=True)
+            '<span>TF-IDF + SVM · Revisão 2026.10.08-svm3</span></div>', unsafe_allow_html=True)

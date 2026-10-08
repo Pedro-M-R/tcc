@@ -1,13 +1,34 @@
 """Inferência TF-IDF + SVM calibrado, sem dependência de PyTorch ou Transformers."""
 
 import json
+import re
 from pathlib import Path
 
 import joblib
 import numpy as np
 
-from preparacao_noticias import preparar_noticia, VERSAO_PREPARACAO
-from triagem_noticias import avaliar_entrada, INDICIOS
+from preparacao_noticias import preparar_noticia, simplificar, VERSAO_PREPARACAO
+from triagem_noticias import INDICIOS
+
+
+def opiniao_pessoal(titulo, texto):
+    """Convenção explícita do aplicativo; não é previsão nem verificação factual.
+
+    Só aceita a frase inteira, inclusive quando repetida no título e no corpo.
+    Uma notícia que apenas menciona a frase continua sendo analisada pelo SVM.
+    """
+    entradas = {" ".join(simplificar(s).strip(" .!").split())
+                for s in (titulo, texto) if str(s).strip()}
+    if len(entradas) != 1:
+        return False
+    frase = entradas.pop()
+    padrao = re.fullmatch(
+        r"(?:o |a )?(?P<pessoa>[a-z]+(?: [a-z]+){0,3}) (?:e|eh) "
+        r"(?:muito )?(?:bonito|bonita|lindo|linda)", frase)
+    if not padrao:
+        return False
+    return not set(padrao['pessoa'].split()) & {
+        'nao', 'nunca', 'ninguem', 'se', 'que', 'disse', 'segundo', 'quando', 'porque', 'e', 'eh'}
 
 
 class ModeloSVMLeve:
@@ -20,7 +41,6 @@ class ModeloSVMLeve:
             raise ValueError("Preparação do modelo incompatível com a aplicação.")
         self.modelo = joblib.load(self.pasta / "modelo.joblib")
         self.calibrador = joblib.load(self.pasta / "calibrador.joblib")
-        self.dominio = joblib.load(self.pasta / "dominio.joblib")
         if list(self.modelo.classes_) != [0, 1] or list(self.calibrador.classes_) != [0, 1]:
             raise ValueError("Ordem de classes inválida para o modelo binário.")
         if self.politica["rotulos"] != ["fake", "true"]:
@@ -31,19 +51,19 @@ class ModeloSVMLeve:
         return self.calibrador.predict_proba(np.asarray(margens).reshape(-1, 1))
 
     def analisar_noticia(self, titulo, texto):
-        motivo = avaliar_entrada(titulo, texto)
-        if motivo:
-            return {"rotulo": "inconclusivo", "mensagem": INDICIOS["inconclusivo"], "motivo": motivo}
+        if not (str(titulo).strip() or str(texto).strip()):
+            raise ValueError("Digite um título ou texto para analisar.")
+        if opiniao_pessoal(titulo, texto):
+            return {"rotulo": "fake", "mensagem": "Falsa — regra para opinião pessoal",
+                    "origem": "regra_opiniao",
+                    "motivo": "Opinião pessoal classificada como falsa por uma regra do aplicativo. "
+                              "Não é uma previsão do SVM nem uma verificação objetiva."}
         entrada = preparar_noticia(titulo, texto)
-        if not self.dominio.aceitar([entrada])[0]:
-            return {"rotulo": "inconclusivo", "mensagem": INDICIOS["inconclusivo"],
-                    "motivo": "O vocabulário do texto ou de um trecho tem pouca relação com as notícias do treinamento."}
         probs = self.escores([entrada])[0]
         indice = int(probs.argmax())
-        aceito = bool(probs[indice] >= self.politica["limiares"][indice])
-        rotulo = self.politica["rotulos"][indice] if aceito else "inconclusivo"
+        rotulo = self.politica["rotulos"][indice]
         return {"rotulo": rotulo, "mensagem": INDICIOS[rotulo], "calibrado": True,
+                "origem": "svm",
                 "probabilidades": dict(zip(self.politica["rotulos"], map(float, probs))),
                 "truncado": False,
-                "motivo": "Padrões do texto; os fatos não foram verificados." if aceito else
-                          "O escore não atingiu o limiar definido na seleção. Confira outras fontes."}
+                "motivo": "Classificação binária pelos padrões do texto; os fatos não foram verificados."}

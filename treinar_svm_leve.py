@@ -102,8 +102,13 @@ def main(argv=None):
     joblib.dump(calibrador, a.saida / "calibrador.joblib", compress=3)
 
     print("Ajustando filtro de domínio com treino e validação…", flush=True)
-    dominio = FiltroDominio().ajustar(treino.loc[elegiveis(treino), "entrada_a"],
-                                     validacao.loc[elegiveis(validacao), "entrada_a"])
+    # O piso histórico de 0.15 rejeitava notícias que a própria validação
+    # considerava familiares. Para o SVM, aprenda o limite na validação.
+    entradas_validacao = validacao.loc[elegiveis(validacao), "entrada_a"]
+    if entradas_validacao.empty:
+        raise ValueError("Sem notícias elegíveis na validação para ajustar o filtro de domínio.")
+    dominio = FiltroDominio(piso_similaridade=0).ajustar(
+        treino.loc[elegiveis(treino), "entrada_a"], entradas_validacao)
     joblib.dump(dominio, a.saida / "dominio.joblib", compress=3)
     salvar_json(a.saida / "dominio.json", dominio.descrever())
 

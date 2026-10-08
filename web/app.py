@@ -16,7 +16,7 @@ st.set_page_config(page_title="Notícia em análise", page_icon="📰", layout="
 
 
 @st.cache_resource(show_spinner=False)
-def carregar_modelo(caminho, tipo):
+def carregar_modelo(caminho, tipo, versao=None):
     return Classificador(caminho, tipo)
 
 
@@ -171,7 +171,7 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
             with st.spinner("Analisando a notícia… O primeiro acesso pode levar alguns instantes."):
                 for modelo in opcoes[selecao]:
                     try:
-                        classificador = carregar_modelo(modelo["caminho"], modelo["tipo"])
+                        classificador = carregar_modelo(modelo["caminho"], modelo["tipo"], modelo.get("versao"))
                         resultados.append((modelo, classificador.analisar(titulo, texto)))
                     except Exception:
                         logging.getLogger(__name__).exception("Não foi possível executar %s.", modelo["nome"])
@@ -201,4 +201,4 @@ with st.container(key="aviso_modelo"):
             "Não considere o resultado 100% certo. A análise pode ser inconclusiva quando falta contexto ou suporte do modelo. "
             "Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.")
 st.markdown('<div class="rodape"><span>Notícia em análise · Projeto acadêmico</span>'
-            '<span>TF-IDF + SVM · Revisão 2026.10.08-svm</span></div>', unsafe_allow_html=True)
+            '<span>TF-IDF + SVM · Revisão 2026.10.08-svm2</span></div>', unsafe_allow_html=True)

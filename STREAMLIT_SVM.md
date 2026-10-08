@@ -44,13 +44,22 @@ Modelo treinado em 08/10/2026 (scikit-learn 1.8.0):
 | Notícias no teste reservado | 1.042 |
 | Acurácia sem abstenção | 94,43% |
 | F1 macro sem abstenção | 94,40% |
-| Notícias com resposta aceita | 550 (52,78%) |
-| Notícias inconclusivas | 492 (47,22%) |
-| Acurácia nas respostas aceitas | 96,00% |
+| Notícias com resposta aceita | 745 (71,50%) |
+| Notícias inconclusivas | 297 (28,50%) |
+| Acurácia nas respostas aceitas | 95,30% |
 | Modelo, calibrador e filtro em disco | 10,2 MB |
 
-Os 36 testes de regressão passaram, incluindo 6 testes do novo modelo,
-inferência real no Streamlit, interface, leitura de links e triagem.
+Na revisão `2026.10.08-svm2`, o filtro de domínio passou a usar o percentil 2
+da similaridade na validação (aproximadamente 0,0866), sem impor o piso antigo
+de 0,15. Esse piso bloqueava 224 notícias elegíveis da validação apenas por
+similaridade. O vocabulário do filtro continua aprendido somente no treino.
+Os limiares de decisão foram selecionados novamente na partição de seleção;
+o teste foi usado somente para relatar o desempenho após a correção.
+
+A correção reduziu as abstenções de 47,22% para 28,50%; a acurácia das respostas
+aceitas passou de 96,00% para 95,30%. Esses números usam a mesma amostra interna
+da avaliação anterior, e não uma validação externa nova.
+O Streamlit também invalida o cache quando pesos ou política mudam na mesma pasta.
 
 Os escores medem padrões aprendidos, não a probabilidade de um fato ser verdadeiro.
 O teste é uma amostra da base, não uma avaliação prospectiva nem uma validação com
@@ -59,16 +68,18 @@ Uma resposta inconclusiva não significa notícia falsa. Confira sempre as fonte
 
 ## Treinar novamente
 
-Use uma nova pasta para preservar o modelo existente:
+Use uma nova pasta a cada execução para preservar os modelos anteriores:
 
 ```powershell
-.\.venv-svm\Scripts\python.exe treinar_svm_leve.py --csv resultados/bases/base_atualizada_2026-10-06.csv --saida modelos/svm_novo
+$saida = "modelos/svm_" + (Get-Date -Format "yyyyMMdd_HHmmss")
+.\.venv-svm\Scripts\python.exe treinar_svm_leve.py --csv resultados/bases/base_atualizada_2026-10-06.csv --saida $saida
+if ($LASTEXITCODE -ne 0) { throw "O treinamento falhou; confira a mensagem acima." }
 ```
 
 Para testar esse novo artefato sem substituir o padrão:
 
 ```powershell
-$env:TCC_SVM_MODEL_PATH = "modelos/svm_novo"
+$env:TCC_SVM_MODEL_PATH = $saida
 .\.venv-svm\Scripts\python.exe -m streamlit run web/app.py
 ```
 
@@ -79,7 +90,7 @@ Repositório `Pedro-M-R/tcc`, branch `main`, arquivo `web/app.py`.
 Dependências em `web/requirements.txt`; ambiente local validado com Python 3.13.2.
 Veja [PUBLICAR_STREAMLIT.md](PUBLICAR_STREAMLIT.md) para os arquivos e a publicação.
 A atualização do repositório é usada pela implantação existente. O rodapé da
-versão leve identifica **2026.10.08-svm**. Não configure `TCC_MODEL_PATH` para
+versão leve identifica **2026.10.08-svm2**. Não configure `TCC_MODEL_PATH` para
 reativar BERT: o site usa exclusivamente `TCC_SVM_MODEL_PATH` ou o SVM padrão.
 
 Links privados, com login ou protegidos contra leitura automática podem falhar.

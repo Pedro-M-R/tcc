@@ -11,11 +11,14 @@ STOPWORDS = "a ao aos aquela aquele aqui as ate com como da das de dela dele do 
 
 
 class FiltroDominio:
-    def __init__(self):
+    def __init__(self, piso_similaridade=.15):
+        if not 0 <= piso_similaridade <= 1:
+            raise ValueError("Piso de similaridade deve estar entre zero e um.")
+        self.piso_similaridade = float(piso_similaridade)
         self.vetor = TfidfVectorizer(strip_accents="unicode", lowercase=True, stop_words=STOPWORDS,
                                      token_pattern=r"(?u)\b[^\W\d_]{3,}\b", sublinear_tf=True,
                                      max_features=50000, ngram_range=(1, 1))
-        self.limiar_similaridade = .15
+        self.limiar_similaridade = self.piso_similaridade
         self.limiar_cobertura = .35
 
     def ajustar(self, textos_treino, textos_validacao):
@@ -28,7 +31,7 @@ class FiltroDominio:
         self.quantidade_treino = len(textos_treino)
         scores = self.medidas(list(textos_validacao))
         if len(scores):
-            self.limiar_similaridade = max(.15, float(np.quantile(scores[:, 0], .02)))
+            self.limiar_similaridade = max(self.piso_similaridade, float(np.quantile(scores[:, 0], .02)))
             self.limiar_cobertura = max(.35, float(np.quantile(scores[:, 1], .02)))
         return self
 
@@ -56,7 +59,9 @@ class FiltroDominio:
         return (scores[:, 0] >= self.limiar_similaridade) & (scores[:, 1] >= self.limiar_cobertura)
 
     def descrever(self):
-        return {"metodo": "TF-IDF por trechos; referência só do treino; percentil 2 da validação com pisos fixos",
+        return {"metodo": "TF-IDF por trechos; referência só do treino; percentil 2 da validação",
+                "piso_similaridade": getattr(self, "piso_similaridade", .15),
+                "piso_cobertura": .35,
                 "referencias_treino": self.quantidade_treino,
                 "limiar_similaridade": self.limiar_similaridade, "limiar_cobertura": self.limiar_cobertura,
                 "nota": "Filtro de familiaridade lexical; não comprova fatos nem identifica todo texto inadequado."}

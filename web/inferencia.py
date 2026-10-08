@@ -30,7 +30,21 @@ def modelos_do_site():
     caminho = Path(os.environ.get("TCC_SVM_MODEL_PATH", "modelos/svm_leve"))
     if not caminho.is_absolute():
         caminho = PASTA_PROJETO / caminho
-    return [{"tipo": "svm_leve", "nome": "TF-IDF + SVM", "caminho": str(caminho.resolve())}]
+    return [{"tipo": "svm_leve", "nome": "TF-IDF + SVM", "caminho": str(caminho.resolve()),
+             "versao": versao_modelo(caminho)}]
+
+
+def versao_modelo(caminho):
+    """Invalida o cache quando pesos ou política são atualizados na mesma pasta."""
+    versao = []
+    for nome in ("modelo.joblib", "calibrador.joblib", "dominio.joblib",
+                 "politica_decisao.json", "concluido.json"):
+        try:
+            estado = (Path(caminho) / nome).stat()
+            versao.append((nome, estado.st_mtime_ns, estado.st_size))
+        except FileNotFoundError:
+            versao.append((nome, None, None))
+    return tuple(versao)
 
 
 class Classificador:

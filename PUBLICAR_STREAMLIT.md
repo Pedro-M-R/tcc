@@ -34,7 +34,7 @@ publicação, incluindo o modelo, sem base de treinamento ou checkpoints.
    `web/requirements.txt`. Esse arquivo fica ao lado do app, conforme a
    [documentação de dependências](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/app-dependencies).
 4. Abra o app e confirme a única opção **TF-IDF + SVM** e o rodapé
-   **2026.10.08-svm**. Faça uma análise; abrir a página inicial não basta para
+   **2026.10.08-svm2**. Faça uma análise; abrir a página inicial não basta para
    comprovar que o modelo carregou.
 
 Não use `requirements.txt` da raiz do projeto original para instalar o site:

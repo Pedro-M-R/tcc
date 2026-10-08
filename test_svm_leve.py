@@ -17,7 +17,7 @@ from web.inferencia import Classificador, modelos_do_site
 from test_triagem import NOTICIA
 
 RAIZ = Path(__file__).resolve().parent
-MODELO = RAIZ / "modelos/svm_leve"
+MODELO = Path(os.environ.get("TCC_SVM_MODEL_PATH", RAIZ / "modelos/svm_leve")).resolve()
 
 
 class TestSVMLeve(unittest.TestCase):
@@ -44,7 +44,7 @@ class TestSVMLeve(unittest.TestCase):
         codigo = """
 import sys
 from web.inferencia import Classificador
-m = Classificador('modelos/svm_leve')
+m = Classificador(sys.argv[1])
 assert m.tipo == 'svm_leve'
 assert m.analisar('', 'Olá')['rotulo'] == 'inconclusivo'
 assert 'torch' not in sys.modules
@@ -53,8 +53,44 @@ assert 'prever' not in sys.modules
 assert 'treinamento_local.inferencia' not in sys.modules
 print('CPU OK')
 """
-        r = subprocess.run([sys.executable, "-c", codigo], cwd=RAIZ, capture_output=True, text=True)
+        r = subprocess.run([sys.executable, "-c", codigo, str(MODELO)], cwd=RAIZ, capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_filtro_corrigido_aceita_noticia_nova_e_rejeita_vocabulario_alheio(self):
+        modelo = ModeloSVMLeve(MODELO)
+        entrada = preparar_noticia("", NOTICIA)
+        self.assertTrue(modelo.dominio.aceitar([entrada])[0])
+        estranho = "galaxias unicornios dragao nebulosa abacaxi teletransporte " * 70
+        self.assertFalse(modelo.dominio.aceitar([estranho])[0])
+        self.assertFalse(modelo.dominio.aceitar([entrada + " " + estranho])[0])
+
+    def test_cache_recarrega_apos_atualizar_artefatos_na_mesma_pasta(self):
+        import streamlit as st
+        from streamlit.testing.v1 import AppTest
+        st.cache_resource.clear()
+        self.addCleanup(st.cache_resource.clear)
+        sys.path.insert(0, str(RAIZ / "web"))
+        modelo = Mock()
+        modelo.analisar.return_value = {"rotulo": "true", "calibrado": True,
+                                       "probabilidades": {"fake": .1, "true": .9}}
+        with tempfile.TemporaryDirectory() as pasta:
+            concluido = Path(pasta) / "concluido.json"
+            concluido.write_text("{}", encoding="utf-8")
+            with patch.dict(os.environ, {"TCC_SVM_MODEL_PATH": pasta}), \
+                 patch("inferencia.Classificador", return_value=modelo) as carregar:
+                app = AppTest.from_file(str(RAIZ / "web/app.py"), default_timeout=30).run()
+                app.text_area[0].set_value(NOTICIA)
+                app.button[0].click().run()
+                self.assertFalse(app.exception)
+                self.assertFalse(app.error)
+                self.assertEqual(carregar.call_count, 1)
+                app.button[0].click().run()
+                self.assertEqual(carregar.call_count, 1)
+                concluido.write_text('{"nova_versao": true}', encoding="utf-8")
+                app.button[0].click().run()
+                self.assertFalse(app.exception)
+                self.assertFalse(app.error)
+                self.assertEqual(carregar.call_count, 2)
 
     @unittest.skipUnless((RAIZ / "resultados/bases/base_atualizada_2026-10-06.csv").is_file(), "Exige base local")
     def test_mesmos_resultados_do_teste_reservado(self):

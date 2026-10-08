@@ -1,4 +1,4 @@
-"""Adaptador do site para a mesma inferência usada por testar_noticias.py."""
+"""Inferência leve do site; adaptadores históricos exigem um tipo explícito."""
 
 import os
 import sys
@@ -10,15 +10,14 @@ if str(PASTA_PROJETO) not in sys.path:
     sys.path.insert(0, str(PASTA_PROJETO))
 
 from dados_modelos import juntar_texto as preparar_entrada
-from prever import carregar_bertimbau, carregar_svm, prever_noticias, selecionar_bertimbau
-from resultados_noticias import modelos_disponiveis
-from treinamento_local.inferencia import ModeloLocal
 from svm_leve import ModeloSVMLeve
 from preparacao_noticias import VERSAO_PREPARACAO
 import json
 
 
 def caminho_modelo():
+    from prever import selecionar_bertimbau
+
     configurado = os.environ.get("BERTIMBAU_MODEL_PATH")
     if configurado:
         caminho = Path(configurado)
@@ -35,20 +34,26 @@ def modelos_do_site():
 
 
 class Classificador:
-    def __init__(self, caminho, tipo="bertimbau"):
+    def __init__(self, caminho, tipo="svm_leve"):
         self.caminho = str(Path(caminho).resolve())
         self.tipo = tipo
         self.lock = Lock()
         if tipo == "svm_leve":
             self.leve = ModeloSVMLeve(self.caminho)
         elif tipo == "local":
+            from treinamento_local.inferencia import ModeloLocal
+
             politica = json.loads((Path(self.caminho) / "politica_decisao.json").read_text(encoding="utf-8"))
             if politica.get("preparacao") != VERSAO_PREPARACAO or not politica.get("dominio"):
                 raise ValueError("Este site exige um novo experimento com palavras ignoradas e filtro de domínio.")
             self.local = ModeloLocal(self.caminho, "noticia", cpu=True)
         elif tipo == "svm":
+            from prever import carregar_svm
+
             carregar_svm(self.caminho)
         elif tipo == "bertimbau":
+            from prever import carregar_bertimbau
+
             caminho = Path(self.caminho)
             for nome in ("config.json", "tokenizer_config.json", "model.safetensors"):
                 if not (caminho / nome).is_file():
@@ -80,6 +85,8 @@ class Classificador:
                     resultado["truncado"] = detalhes["truncado"]
                     resultado["calibrado"] = True
                 return resultado
+            from prever import prever_noticias
+
             resultado = prever_noticias([titulo], [texto], self.caminho, self.tipo,
                                        batch_size=1, cpu=True, detalhes=True)[0]
         resultado["rotulo"] = resultado["rotulo_previsto"]

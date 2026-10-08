@@ -44,10 +44,13 @@ class TestSVMLeve(unittest.TestCase):
         codigo = """
 import sys
 from web.inferencia import Classificador
-m = Classificador('modelos/svm_leve', 'svm_leve')
+m = Classificador('modelos/svm_leve')
+assert m.tipo == 'svm_leve'
 assert m.analisar('', 'Olá')['rotulo'] == 'inconclusivo'
 assert 'torch' not in sys.modules
 assert 'transformers' not in sys.modules
+assert 'prever' not in sys.modules
+assert 'treinamento_local.inferencia' not in sys.modules
 print('CPU OK')
 """
         r = subprocess.run([sys.executable, "-c", codigo], cwd=RAIZ, capture_output=True, text=True)

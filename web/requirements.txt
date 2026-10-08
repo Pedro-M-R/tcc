@@ -1,4 +1,5 @@
 # Site leve; Python 3.11 a 3.14. Sem PyTorch, Transformers ou GPU.
+# Revisão svm3: renovar o processo na nuvem após remover o filtro de domínio.
 streamlit==1.64.0
 readability-lxml==0.9
 lxml>=5,<7

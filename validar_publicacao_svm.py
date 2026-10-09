@@ -37,7 +37,7 @@ def main():
         assert not erros and not inconclusivo, registro
         assert any('2026.10.09-checagem1' in s for s in rodape), registro
         if nome.startswith('checagem'):
-            assert len(titulos) == 1 and 'Alegação falsa' in titulos[0], registro
+            assert len(titulos) == 1 and 'Há indícios de que seja uma alegação falsa' in titulos[0], registro
             assert 'Boatos.org' in titulos[0] and not metricas, registro
             assert not any('Há indícios de que seja verdadeira' in s for s in mensagens), registro
         elif nome.startswith('opiniao'):

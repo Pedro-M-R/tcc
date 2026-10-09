@@ -22,7 +22,7 @@ def carregar_modelo(caminho, tipo, versao=None):
 
 
 def mostrar_checagem(checagem):
-    rotulo = "Alegação falsa" if checagem["rotulo"] == "fake" else "Alegação verdadeira"
+    rotulo = "Há indícios de que seja uma alegação falsa" if checagem["rotulo"] == "fake" else "Alegação verdadeira"
     classe = "falsa" if checagem["rotulo"] == "fake" else "verdadeira"
     st.markdown(
         f'<section class="resultado {classe}" role="status"><div>'

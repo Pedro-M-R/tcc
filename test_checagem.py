@@ -59,7 +59,7 @@ class TestChecagem(unittest.TestCase):
                 app.text_input[0].set_value(URL)
                 app.button[0].click().run()
         self.assertEqual(len(app.exception), 0)
-        self.assertTrue(any("Alegação falsa" in m.value and "Boatos.org" in m.value for m in app.markdown))
+        self.assertTrue(any("Há indícios de que seja uma alegação falsa" in m.value and "Boatos.org" in m.value for m in app.markdown))
         self.assertFalse(app.warning)
         self.assertFalse(app.metric)
         self.assertFalse(any("Há indícios de que seja verdadeira" in m.value for m in app.markdown))
@@ -79,7 +79,7 @@ class TestChecagem(unittest.TestCase):
         self.assertFalse(app.exception)
         extrair.assert_called_once_with(URL)
         carregar.assert_not_called()
-        self.assertTrue(any("Alegação falsa" in m.value for m in app.markdown))
+        self.assertTrue(any("Há indícios de que seja uma alegação falsa" in m.value for m in app.markdown))
         self.assertFalse(app.metric)
 
     def test_sem_selo_nao_usa_svm_para_inventar_conclusao(self):
@@ -117,7 +117,7 @@ class TestChecagem(unittest.TestCase):
             app.button[0].click().run()
         self.assertFalse(app.exception)
         self.assertTrue(any("Alegação verdadeira" in m.value for m in app.markdown))
-        self.assertFalse(any("Alegação falsa" in m.value for m in app.markdown))
+        self.assertFalse(any("Há indícios de que seja uma alegação falsa" in m.value for m in app.markdown))
 
     @unittest.skipUnless(all((Path("resultados/revisao_casos_reais") / (nome + ".html")).exists()
                              for nome in ("eduarda", "tse")), "Exige HTML público salvo no diagnóstico local")
@@ -138,7 +138,7 @@ class TestChecagem(unittest.TestCase):
                 self.assertFalse(app.exception)
                 self.assertFalse(app.error)
                 self.assertFalse(app.metric)
-                self.assertTrue(any("Alegação falsa" in m.value for m in app.markdown))
+                self.assertTrue(any("Há indícios de que seja uma alegação falsa" in m.value for m in app.markdown))
                 self.assertFalse(any("Há indícios de que seja verdadeira" in m.value for m in app.markdown))
                 carregar.assert_not_called()
 

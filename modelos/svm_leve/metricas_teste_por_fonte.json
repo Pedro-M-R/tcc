@@ -1,142 +1,72 @@
 {
   "afolhabrasil.com.br": {
     "total": 16,
-    "acuracia_sem_abstencao": 0.4375,
-    "f1_macro_sem_abstencao": 0.30434782608695654,
-    "brier_multiclasse": 0.7483444242056705,
-    "aceitos": 16,
-    "abstencoes": 0,
-    "cobertura": 1.0,
-    "acuracia_aceitos": 0.4375,
     "ordem_classes": [
       "fake",
       "true"
     ],
+    "acuracia_sem_abstencao": 0.375,
+    "f1_macro_sem_abstencao": 0.2727272727272727,
+    "f2_fake": 0.42857142857142855,
     "matriz_confusao_sem_abstencao": [
       [
-        7,
-        9
+        6,
+        10
       ],
       [
         0,
         0
       ]
     ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 1.0,
+        "recall": 0.375,
+        "f1-score": 0.5454545454545454,
+        "support": 16.0
+      },
+      "true": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "accuracy": 0.375,
+      "macro avg": {
+        "precision": 0.5,
+        "recall": 0.1875,
+        "f1-score": 0.2727272727272727,
+        "support": 16.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 0.375,
+        "f1-score": 0.5454545454545454,
+        "support": 16.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 6,
+      "true": 10
+    },
+    "colapso_uma_classe": false,
+    "baseline_majoritaria": 1.0,
+    "aceitos": 16,
+    "abstencoes": 0,
+    "cobertura": 1.0,
+    "acuracia_aceitos": 0.375,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.8753664490422367
   },
   "ceticismopolitico.com": {
     "total": 2,
-    "acuracia_sem_abstencao": 0.0,
-    "f1_macro_sem_abstencao": 0.0,
-    "brier_multiclasse": 1.126852331351587,
-    "aceitos": 2,
-    "abstencoes": 0,
-    "cobertura": 1.0,
-    "acuracia_aceitos": 0.0,
     "ordem_classes": [
       "fake",
       "true"
     ],
-    "matriz_confusao_sem_abstencao": [
-      [
-        0,
-        2
-      ],
-      [
-        0,
-        0
-      ]
-    ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
-  },
-  "checamos.afp.com": {
-    "total": 1,
     "acuracia_sem_abstencao": 1.0,
-    "f1_macro_sem_abstencao": 1.0,
-    "brier_multiclasse": 0.20958646322470367,
-    "aceitos": 1,
-    "abstencoes": 0,
-    "cobertura": 1.0,
-    "acuracia_aceitos": 1.0,
-    "ordem_classes": [
-      "fake",
-      "true"
-    ],
-    "matriz_confusao_sem_abstencao": [
-      [
-        0,
-        0
-      ],
-      [
-        0,
-        1
-      ]
-    ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
-  },
-  "economia.estadao.com.br": {
-    "total": 1,
-    "acuracia_sem_abstencao": 0.0,
-    "f1_macro_sem_abstencao": 0.0,
-    "brier_multiclasse": 0.8303862379873586,
-    "aceitos": 1,
-    "abstencoes": 0,
-    "cobertura": 1.0,
-    "acuracia_aceitos": 0.0,
-    "ordem_classes": [
-      "fake",
-      "true"
-    ],
-    "matriz_confusao_sem_abstencao": [
-      [
-        0,
-        0
-      ],
-      [
-        1,
-        0
-      ]
-    ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
-  },
-  "economia.uol.com.br": {
-    "total": 16,
-    "acuracia_sem_abstencao": 1.0,
-    "f1_macro_sem_abstencao": 1.0,
-    "brier_multiclasse": 0.04697298176330531,
-    "aceitos": 16,
-    "abstencoes": 0,
-    "cobertura": 1.0,
-    "acuracia_aceitos": 1.0,
-    "ordem_classes": [
-      "fake",
-      "true"
-    ],
-    "matriz_confusao_sem_abstencao": [
-      [
-        16,
-        0
-      ],
-      [
-        0,
-        0
-      ]
-    ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
-  },
-  "educacao.uol.com.br": {
-    "total": 2,
-    "acuracia_sem_abstencao": 1.0,
-    "f1_macro_sem_abstencao": 1.0,
-    "brier_multiclasse": 0.0003672980779999368,
-    "aceitos": 2,
-    "abstencoes": 0,
-    "cobertura": 1.0,
-    "acuracia_aceitos": 1.0,
-    "ordem_classes": [
-      "fake",
-      "true"
-    ],
+    "f1_macro_sem_abstencao": 0.5,
+    "f2_fake": 1.0,
     "matriz_confusao_sem_abstencao": [
       [
         2,
@@ -147,171 +77,232 @@
         0
       ]
     ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
-  },
-  "g1.globo.com": {
-    "total": 384,
-    "acuracia_sem_abstencao": 0.9765625,
-    "f1_macro_sem_abstencao": 0.9715637470687457,
-    "brier_multiclasse": 0.03302687284705955,
-    "aceitos": 384,
-    "abstencoes": 0,
-    "cobertura": 1.0,
-    "acuracia_aceitos": 0.9765625,
-    "ordem_classes": [
-      "fake",
-      "true"
-    ],
-    "matriz_confusao_sem_abstencao": [
-      [
-        107,
-        5
-      ],
-      [
-        4,
-        268
-      ]
-    ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
-  },
-  "noticias.uol.com.br": {
-    "total": 146,
-    "acuracia_sem_abstencao": 0.9041095890410958,
-    "f1_macro_sem_abstencao": 0.4748201438848921,
-    "brier_multiclasse": 0.1329885445845309,
-    "aceitos": 146,
-    "abstencoes": 0,
-    "cobertura": 1.0,
-    "acuracia_aceitos": 0.9041095890410958,
-    "ordem_classes": [
-      "fake",
-      "true"
-    ],
-    "matriz_confusao_sem_abstencao": [
-      [
-        132,
-        14
-      ],
-      [
-        0,
-        0
-      ]
-    ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
-  },
-  "politica.estadao.com.br": {
-    "total": 7,
-    "acuracia_sem_abstencao": 1.0,
-    "f1_macro_sem_abstencao": 1.0,
-    "brier_multiclasse": 0.04860333871902838,
-    "aceitos": 7,
-    "abstencoes": 0,
-    "cobertura": 1.0,
-    "acuracia_aceitos": 1.0,
-    "ordem_classes": [
-      "fake",
-      "true"
-    ],
-    "matriz_confusao_sem_abstencao": [
-      [
-        0,
-        0
-      ],
-      [
-        0,
-        7
-      ]
-    ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
-  },
-  "projetocomprova.com.br": {
-    "total": 82,
-    "acuracia_sem_abstencao": 0.9512195121951219,
-    "f1_macro_sem_abstencao": 0.4875,
-    "brier_multiclasse": 0.05719078231122921,
-    "aceitos": 82,
-    "abstencoes": 0,
-    "cobertura": 1.0,
-    "acuracia_aceitos": 0.9512195121951219,
-    "ordem_classes": [
-      "fake",
-      "true"
-    ],
-    "matriz_confusao_sem_abstencao": [
-      [
-        0,
-        0
-      ],
-      [
-        4,
-        78
-      ]
-    ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
-  },
-  "www.boatos.org": {
-    "total": 359,
-    "acuracia_sem_abstencao": 0.9805013927576601,
-    "f1_macro_sem_abstencao": 0.9803985803985804,
-    "brier_multiclasse": 0.036293969716718895,
-    "aceitos": 359,
-    "abstencoes": 0,
-    "cobertura": 1.0,
-    "acuracia_aceitos": 0.9805013927576601,
-    "ordem_classes": [
-      "fake",
-      "true"
-    ],
-    "matriz_confusao_sem_abstencao": [
-      [
-        189,
-        0
-      ],
-      [
-        7,
-        163
-      ]
-    ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
-  },
-  "www.e-farsas.com": {
-    "total": 10,
-    "acuracia_sem_abstencao": 1.0,
-    "f1_macro_sem_abstencao": 1.0,
-    "brier_multiclasse": 0.05535768828975607,
-    "aceitos": 10,
-    "abstencoes": 0,
-    "cobertura": 1.0,
-    "acuracia_aceitos": 1.0,
-    "ordem_classes": [
-      "fake",
-      "true"
-    ],
-    "matriz_confusao_sem_abstencao": [
-      [
-        0,
-        0
-      ],
-      [
-        0,
-        10
-      ]
-    ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
-  },
-  "www.thejornalbrasil.com.br": {
-    "total": 2,
-    "acuracia_sem_abstencao": 0.5,
-    "f1_macro_sem_abstencao": 0.3333333333333333,
-    "brier_multiclasse": 1.0522713411718794,
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2.0
+      },
+      "true": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 0.5,
+        "recall": 0.5,
+        "f1-score": 0.5,
+        "support": 2.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 2,
+      "true": 0
+    },
+    "colapso_uma_classe": true,
+    "baseline_majoritaria": 1.0,
     "aceitos": 2,
     "abstencoes": 0,
     "cobertura": 1.0,
-    "acuracia_aceitos": 0.5,
+    "acuracia_aceitos": 1.0,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.19792742986090792
+  },
+  "checamos.afp.com": {
+    "total": 1,
     "ordem_classes": [
       "fake",
       "true"
     ],
+    "acuracia_sem_abstencao": 1.0,
+    "f1_macro_sem_abstencao": 0.5,
+    "f2_fake": 0.0,
+    "matriz_confusao_sem_abstencao": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "true": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 0.5,
+        "recall": 0.5,
+        "f1-score": 0.5,
+        "support": 1.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 0,
+      "true": 1
+    },
+    "colapso_uma_classe": true,
+    "baseline_majoritaria": 1.0,
+    "aceitos": 1,
+    "abstencoes": 0,
+    "cobertura": 1.0,
+    "acuracia_aceitos": 1.0,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.43139394274920617
+  },
+  "economia.estadao.com.br": {
+    "total": 1,
+    "ordem_classes": [
+      "fake",
+      "true"
+    ],
+    "acuracia_sem_abstencao": 0.0,
+    "f1_macro_sem_abstencao": 0.0,
+    "f2_fake": 0.0,
+    "matriz_confusao_sem_abstencao": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ]
+    ],
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "true": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "accuracy": 0.0,
+      "macro avg": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "weighted avg": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 1,
+      "true": 0
+    },
+    "colapso_uma_classe": true,
+    "baseline_majoritaria": 1.0,
+    "aceitos": 1,
+    "abstencoes": 0,
+    "cobertura": 1.0,
+    "acuracia_aceitos": 0.0,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.5441581654296089
+  },
+  "economia.uol.com.br": {
+    "total": 16,
+    "ordem_classes": [
+      "fake",
+      "true"
+    ],
+    "acuracia_sem_abstencao": 0.875,
+    "f1_macro_sem_abstencao": 0.4666666666666667,
+    "f2_fake": 0.8974358974358975,
+    "matriz_confusao_sem_abstencao": [
+      [
+        14,
+        2
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 1.0,
+        "recall": 0.875,
+        "f1-score": 0.9333333333333333,
+        "support": 16.0
+      },
+      "true": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "accuracy": 0.875,
+      "macro avg": {
+        "precision": 0.5,
+        "recall": 0.4375,
+        "f1-score": 0.4666666666666667,
+        "support": 16.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 0.875,
+        "f1-score": 0.9333333333333333,
+        "support": 16.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 14,
+      "true": 2
+    },
+    "colapso_uma_classe": false,
+    "baseline_majoritaria": 1.0,
+    "aceitos": 16,
+    "abstencoes": 0,
+    "cobertura": 1.0,
+    "acuracia_aceitos": 0.875,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.10724370491771985
+  },
+  "educacao.uol.com.br": {
+    "total": 2,
+    "ordem_classes": [
+      "fake",
+      "true"
+    ],
+    "acuracia_sem_abstencao": 0.5,
+    "f1_macro_sem_abstencao": 0.3333333333333333,
+    "f2_fake": 0.5555555555555556,
     "matriz_confusao_sem_abstencao": [
       [
         1,
@@ -322,21 +313,468 @@
         0
       ]
     ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
-  },
-  "www.uol.com.br": {
-    "total": 3,
-    "acuracia_sem_abstencao": 1.0,
-    "f1_macro_sem_abstencao": 1.0,
-    "brier_multiclasse": 0.012763899122877323,
-    "aceitos": 3,
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1-score": 0.6666666666666666,
+        "support": 2.0
+      },
+      "true": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "accuracy": 0.5,
+      "macro avg": {
+        "precision": 0.5,
+        "recall": 0.25,
+        "f1-score": 0.3333333333333333,
+        "support": 2.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1-score": 0.6666666666666666,
+        "support": 2.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 1,
+      "true": 1
+    },
+    "colapso_uma_classe": false,
+    "baseline_majoritaria": 1.0,
+    "aceitos": 2,
     "abstencoes": 0,
     "cobertura": 1.0,
-    "acuracia_aceitos": 1.0,
+    "acuracia_aceitos": 0.5,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.26132765241425193
+  },
+  "g1.globo.com": {
+    "total": 384,
     "ordem_classes": [
       "fake",
       "true"
     ],
+    "acuracia_sem_abstencao": 0.9765625,
+    "f1_macro_sem_abstencao": 0.9714113180077262,
+    "f2_fake": 0.9515260323159784,
+    "matriz_confusao_sem_abstencao": [
+      [
+        106,
+        6
+      ],
+      [
+        3,
+        269
+      ]
+    ],
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 0.9724770642201835,
+        "recall": 0.9464285714285714,
+        "f1-score": 0.9592760180995475,
+        "support": 112.0
+      },
+      "true": {
+        "precision": 0.9781818181818182,
+        "recall": 0.9889705882352942,
+        "f1-score": 0.9835466179159049,
+        "support": 272.0
+      },
+      "accuracy": 0.9765625,
+      "macro avg": {
+        "precision": 0.9753294412010008,
+        "recall": 0.9676995798319328,
+        "f1-score": 0.9714113180077262,
+        "support": 384.0
+      },
+      "weighted avg": {
+        "precision": 0.9765179316096747,
+        "recall": 0.9765625,
+        "f1-score": 0.9764676929694674,
+        "support": 384.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 109,
+      "true": 275
+    },
+    "colapso_uma_classe": false,
+    "baseline_majoritaria": 0.7083333333333334,
+    "aceitos": 384,
+    "abstencoes": 0,
+    "cobertura": 1.0,
+    "acuracia_aceitos": 0.9765625,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.04705091111396318
+  },
+  "noticias.uol.com.br": {
+    "total": 146,
+    "ordem_classes": [
+      "fake",
+      "true"
+    ],
+    "acuracia_sem_abstencao": 0.8698630136986302,
+    "f1_macro_sem_abstencao": 0.4652014652014652,
+    "f2_fake": 0.8931082981715893,
+    "matriz_confusao_sem_abstencao": [
+      [
+        127,
+        19
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 1.0,
+        "recall": 0.8698630136986302,
+        "f1-score": 0.9304029304029304,
+        "support": 146.0
+      },
+      "true": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "accuracy": 0.8698630136986302,
+      "macro avg": {
+        "precision": 0.5,
+        "recall": 0.4349315068493151,
+        "f1-score": 0.4652014652014652,
+        "support": 146.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 0.8698630136986302,
+        "f1-score": 0.9304029304029305,
+        "support": 146.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 127,
+      "true": 19
+    },
+    "colapso_uma_classe": false,
+    "baseline_majoritaria": 1.0,
+    "aceitos": 146,
+    "abstencoes": 0,
+    "cobertura": 1.0,
+    "acuracia_aceitos": 0.8698630136986302,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.19205132560387136
+  },
+  "politica.estadao.com.br": {
+    "total": 7,
+    "ordem_classes": [
+      "fake",
+      "true"
+    ],
+    "acuracia_sem_abstencao": 1.0,
+    "f1_macro_sem_abstencao": 0.5,
+    "f2_fake": 0.0,
+    "matriz_confusao_sem_abstencao": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        7
+      ]
+    ],
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "true": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 7.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 0.5,
+        "recall": 0.5,
+        "f1-score": 0.5,
+        "support": 7.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 7.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 0,
+      "true": 7
+    },
+    "colapso_uma_classe": true,
+    "baseline_majoritaria": 1.0,
+    "aceitos": 7,
+    "abstencoes": 0,
+    "cobertura": 1.0,
+    "acuracia_aceitos": 1.0,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.0596802547116679
+  },
+  "projetocomprova.com.br": {
+    "total": 82,
+    "ordem_classes": [
+      "fake",
+      "true"
+    ],
+    "acuracia_sem_abstencao": 0.9390243902439024,
+    "f1_macro_sem_abstencao": 0.48427672955974843,
+    "f2_fake": 0.0,
+    "matriz_confusao_sem_abstencao": [
+      [
+        0,
+        0
+      ],
+      [
+        5,
+        77
+      ]
+    ],
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "true": {
+        "precision": 1.0,
+        "recall": 0.9390243902439024,
+        "f1-score": 0.9685534591194969,
+        "support": 82.0
+      },
+      "accuracy": 0.9390243902439024,
+      "macro avg": {
+        "precision": 0.5,
+        "recall": 0.4695121951219512,
+        "f1-score": 0.48427672955974843,
+        "support": 82.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 0.9390243902439024,
+        "f1-score": 0.968553459119497,
+        "support": 82.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 5,
+      "true": 77
+    },
+    "colapso_uma_classe": false,
+    "baseline_majoritaria": 1.0,
+    "aceitos": 82,
+    "abstencoes": 0,
+    "cobertura": 1.0,
+    "acuracia_aceitos": 0.9390243902439024,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.1339764296472756
+  },
+  "www.boatos.org": {
+    "total": 359,
+    "ordem_classes": [
+      "fake",
+      "true"
+    ],
+    "acuracia_sem_abstencao": 0.9275766016713092,
+    "f1_macro_sem_abstencao": 0.9265224510359594,
+    "f2_fake": 0.9700722394220846,
+    "matriz_confusao_sem_abstencao": [
+      [
+        188,
+        1
+      ],
+      [
+        25,
+        145
+      ]
+    ],
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 0.8826291079812206,
+        "recall": 0.9947089947089947,
+        "f1-score": 0.9353233830845771,
+        "support": 189.0
+      },
+      "true": {
+        "precision": 0.9931506849315068,
+        "recall": 0.8529411764705882,
+        "f1-score": 0.9177215189873418,
+        "support": 170.0
+      },
+      "accuracy": 0.9275766016713092,
+      "macro avg": {
+        "precision": 0.9378898964563638,
+        "recall": 0.9238250855897914,
+        "f1-score": 0.9265224510359594,
+        "support": 359.0
+      },
+      "weighted avg": {
+        "precision": 0.9349652307710498,
+        "recall": 0.9275766016713092,
+        "f1-score": 0.9269882385259978,
+        "support": 359.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 213,
+      "true": 146
+    },
+    "colapso_uma_classe": false,
+    "baseline_majoritaria": 0.5264623955431755,
+    "aceitos": 359,
+    "abstencoes": 0,
+    "cobertura": 1.0,
+    "acuracia_aceitos": 0.9275766016713092,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.10899479930105231
+  },
+  "www.e-farsas.com": {
+    "total": 10,
+    "ordem_classes": [
+      "fake",
+      "true"
+    ],
+    "acuracia_sem_abstencao": 0.8,
+    "f1_macro_sem_abstencao": 0.4444444444444444,
+    "f2_fake": 0.0,
+    "matriz_confusao_sem_abstencao": [
+      [
+        0,
+        0
+      ],
+      [
+        2,
+        8
+      ]
+    ],
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "true": {
+        "precision": 1.0,
+        "recall": 0.8,
+        "f1-score": 0.8888888888888888,
+        "support": 10.0
+      },
+      "accuracy": 0.8,
+      "macro avg": {
+        "precision": 0.5,
+        "recall": 0.4,
+        "f1-score": 0.4444444444444444,
+        "support": 10.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 0.8,
+        "f1-score": 0.888888888888889,
+        "support": 10.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 2,
+      "true": 8
+    },
+    "colapso_uma_classe": false,
+    "baseline_majoritaria": 1.0,
+    "aceitos": 10,
+    "abstencoes": 0,
+    "cobertura": 1.0,
+    "acuracia_aceitos": 0.8,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.32016782491666645
+  },
+  "www.thejornalbrasil.com.br": {
+    "total": 2,
+    "ordem_classes": [
+      "fake",
+      "true"
+    ],
+    "acuracia_sem_abstencao": 0.5,
+    "f1_macro_sem_abstencao": 0.3333333333333333,
+    "f2_fake": 0.5555555555555556,
+    "matriz_confusao_sem_abstencao": [
+      [
+        1,
+        1
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1-score": 0.6666666666666666,
+        "support": 2.0
+      },
+      "true": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "accuracy": 0.5,
+      "macro avg": {
+        "precision": 0.5,
+        "recall": 0.25,
+        "f1-score": 0.3333333333333333,
+        "support": 2.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1-score": 0.6666666666666666,
+        "support": 2.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 1,
+      "true": 1
+    },
+    "colapso_uma_classe": false,
+    "baseline_majoritaria": 1.0,
+    "aceitos": 2,
+    "abstencoes": 0,
+    "cobertura": 1.0,
+    "acuracia_aceitos": 0.5,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.7509510247216276
+  },
+  "www.uol.com.br": {
+    "total": 3,
+    "ordem_classes": [
+      "fake",
+      "true"
+    ],
+    "acuracia_sem_abstencao": 1.0,
+    "f1_macro_sem_abstencao": 0.5,
+    "f2_fake": 1.0,
     "matriz_confusao_sem_abstencao": [
       [
         3,
@@ -347,31 +785,103 @@
         0
       ]
     ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 3.0
+      },
+      "true": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 0.5,
+        "recall": 0.5,
+        "f1-score": 0.5,
+        "support": 3.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 3.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 3,
+      "true": 0
+    },
+    "colapso_uma_classe": true,
+    "baseline_majoritaria": 1.0,
+    "aceitos": 3,
+    "abstencoes": 0,
+    "cobertura": 1.0,
+    "acuracia_aceitos": 1.0,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.12422731829754953
   },
   "www1.folha.uol.com.br": {
     "total": 11,
-    "acuracia_sem_abstencao": 0.6363636363636364,
-    "f1_macro_sem_abstencao": 0.3888888888888889,
-    "brier_multiclasse": 0.4906733416492912,
-    "aceitos": 11,
-    "abstencoes": 0,
-    "cobertura": 1.0,
-    "acuracia_aceitos": 0.6363636363636364,
     "ordem_classes": [
       "fake",
       "true"
     ],
+    "acuracia_sem_abstencao": 0.7272727272727273,
+    "f1_macro_sem_abstencao": 0.42105263157894735,
+    "f2_fake": 0.0,
     "matriz_confusao_sem_abstencao": [
       [
         0,
         0
       ],
       [
-        4,
-        7
+        3,
+        8
       ]
     ],
-    "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
+    "por_classe_sem_abstencao": {
+      "fake": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "true": {
+        "precision": 1.0,
+        "recall": 0.7272727272727273,
+        "f1-score": 0.8421052631578947,
+        "support": 11.0
+      },
+      "accuracy": 0.7272727272727273,
+      "macro avg": {
+        "precision": 0.5,
+        "recall": 0.36363636363636365,
+        "f1-score": 0.42105263157894735,
+        "support": 11.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 0.7272727272727273,
+        "f1-score": 0.8421052631578948,
+        "support": 11.0
+      }
+    },
+    "distribuicao_previsoes": {
+      "fake": 3,
+      "true": 8
+    },
+    "colapso_uma_classe": false,
+    "baseline_majoritaria": 1.0,
+    "aceitos": 11,
+    "abstencoes": 0,
+    "cobertura": 1.0,
+    "acuracia_aceitos": 0.7272727272727273,
+    "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
+    "brier_multiclasse": 0.275376602110463
   }
 }

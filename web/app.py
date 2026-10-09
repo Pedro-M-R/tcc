@@ -69,6 +69,10 @@ def mostrar_resultado(resultado, nome="TF-IDF + SVM"):
             a, b = st.columns(2)
             a.metric("Escore técnico · indícios favoráveis", formatar_probabilidade(resultado["probabilidades"]["true"]))
             b.metric("Escore técnico · indícios contrários", formatar_probabilidade(resultado["probabilidades"]["fake"]))
+            if "limiar_fake" in resultado and resultado["limiar_fake"] != .5:
+                st.caption("A classificação usa um limiar ajustado em uma amostra separada: "
+                           "escore de indícios contrários a partir de "
+                           f"{formatar_probabilidade(resultado['limiar_fake'])} resulta em Falsa.")
             if resultado.get("truncado"):
                 st.caption("Esta notícia ultrapassa o tamanho de leitura do modelo. "
                            "O resultado considera o título e o início do texto.")

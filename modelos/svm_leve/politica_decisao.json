@@ -4,13 +4,9 @@
     "fake",
     "true"
   ],
-  "limiares": [
-    0.5,
-    0.5
-  ],
-  "calibracao": "Regressão logística sobre a margem do SVM; somente partição de calibração",
-  "decisao": "binaria_sem_abstencao",
+  "limiar_fake": 0.52,
+  "decisao": "binaria_limiar_fake",
   "filtro_dominio": false,
-  "regra_opiniao": "Frases pessoais de beleza inteiras: fake por convenção explícita, sem escore.",
-  "nota": "Escores calibrados na amostra; não são probabilidades de verdade factual."
+  "calibracao": "Logística na partição calibração; variantes com peso total unitário por notícia",
+  "nota": "Limiar escolhido somente na seleção. Escores não representam probabilidade de verdade factual."
 }

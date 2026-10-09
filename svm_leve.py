@@ -11,6 +11,13 @@ from preparacao_noticias import preparar_noticia, simplificar, VERSAO_PREPARACAO
 from triagem_noticias import INDICIOS
 
 
+def decidir(probs, limiar_fake=.5):
+    """Classe 0 = fake; o limiar salvo é usado tanto na avaliação quanto no site."""
+    if not np.isfinite(limiar_fake) or not 0 < limiar_fake < 1:
+        raise ValueError("limiar_fake precisa estar entre zero e um.")
+    return np.where(np.asarray(probs)[:, 0] >= limiar_fake, 0, 1)
+
+
 def opiniao_pessoal(titulo, texto):
     """Convenção explícita do aplicativo; não é previsão nem verificação factual.
 
@@ -45,6 +52,7 @@ class ModeloSVMLeve:
             raise ValueError("Ordem de classes inválida para o modelo binário.")
         if self.politica["rotulos"] != ["fake", "true"]:
             raise ValueError("Rótulos incompatíveis.")
+        decidir(np.array([[.5, .5]]), self.politica.get("limiar_fake", .5))
 
     def escores(self, entradas):
         margens = self.modelo.decision_function(entradas)
@@ -60,10 +68,12 @@ class ModeloSVMLeve:
                               "Não é uma previsão do SVM nem uma verificação objetiva."}
         entrada = preparar_noticia(titulo, texto)
         probs = self.escores([entrada])[0]
-        indice = int(probs.argmax())
+        limiar = self.politica.get("limiar_fake", .5)
+        indice = int(decidir(probs.reshape(1, -1), limiar)[0])
         rotulo = self.politica["rotulos"][indice]
         return {"rotulo": rotulo, "mensagem": INDICIOS[rotulo], "calibrado": True,
                 "origem": "svm",
                 "probabilidades": dict(zip(self.politica["rotulos"], map(float, probs))),
+                "limiar_fake": limiar,
                 "truncado": False,
                 "motivo": "Classificação binária pelos padrões do texto; os fatos não foram verificados."}

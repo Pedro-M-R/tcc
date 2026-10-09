@@ -2,6 +2,7 @@
 
 import http.client
 import ipaddress
+import re
 import socket
 import ssl
 import time
@@ -13,6 +14,17 @@ MAX_TEXTO = 30_000
 
 class ErroLink(ValueError):
     """Mensagem de leitura que pode ser apresentada ao visitante."""
+
+
+def link_colado(titulo, texto):
+    """Um URL isolado no formulário de texto usa o leitor, nunca o SVM."""
+    tokens = f"{titulo} {texto}".split()
+    if not tokens or not all(re.fullmatch(r"https?://\S+", t, re.IGNORECASE) for t in tokens):
+        return None
+    urls = set(tokens)
+    if len(urls) != 1:
+        raise ErroLink("Analise um link por vez. Cole apenas uma das URLs.")
+    return urls.pop()
 
 
 def validar_destino(url):
@@ -112,7 +124,7 @@ def baixar_html(url):
 def extrair_html(html, url):
     from lxml import html as parser_html
     from readability import Document
-    from checagem import extrair_checagem
+    from checagem import eh_pagina_checagem, extrair_checagem
 
     documento = Document(html)
     arvore = parser_html.fromstring(html)
@@ -131,7 +143,8 @@ def extrair_html(html, url):
         raise ErroLink("Não encontrei título e texto suficientes para analisar. "
                        "A página pode exigir login ou carregar o conteúdo dinamicamente. Cole o conteúdo na outra opção.")
     return {"titulo": titulo[:500], "texto": texto[:MAX_TEXTO], "url": url,
-            "texto_limitado": len(texto) > MAX_TEXTO, "checagem": checagem}
+            "texto_limitado": len(texto) > MAX_TEXTO, "checagem": checagem,
+            "pagina_checagem": eh_pagina_checagem(arvore, url)}
 
 
 def extrair_noticia(url):

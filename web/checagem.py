@@ -5,6 +5,21 @@ import unicodedata
 from urllib.parse import urlsplit
 
 
+def eh_pagina_checagem(arvore, url):
+    """Identifica o tipo de página; isso não atribui verdadeiro/falso."""
+    if urlsplit(url).hostname not in {"boatos.org", "www.boatos.org"}:
+        return False
+    return any(re.match(r"Boato\s*[–—-]\s*\S", " ".join(e.text_content().split()), re.IGNORECASE)
+               for e in arvore.xpath("//article//p"))
+
+
+def texto_parece_checagem(texto):
+    """Texto colado não autentica uma fonte nem autoriza extrair um veredito."""
+    return bool(re.search(r"\bBoato\s*[–—-]\s*\S", texto, re.IGNORECASE)
+                and re.search(r"\bChecagem\b", texto, re.IGNORECASE)
+                and re.search(r"\bConclus[aã]o\b", texto, re.IGNORECASE))
+
+
 def extrair_checagem(arvore, url):
     # O domínio sozinho nunca define um veredito. É necessário encontrar a
     # alegação e um selo explícito depois da seção Conclusão no mesmo artigo.

@@ -7,7 +7,8 @@ from pathlib import Path
 import streamlit as st
 
 from inferencia import Classificador, modelos_do_site
-from extrair_link import ErroLink, extrair_noticia
+from extrair_link import ErroLink, extrair_noticia, link_colado
+from checagem import texto_parece_checagem
 from apresentacao import formatar_probabilidade
 from triagem_noticias import INDICIOS, avaliar_entrada
 
@@ -21,7 +22,7 @@ def carregar_modelo(caminho, tipo, versao=None):
 
 
 def mostrar_checagem(checagem):
-    rotulo = "A fonte contesta a alegação" if checagem["rotulo"] == "fake" else "A fonte sustenta a alegação"
+    rotulo = "Alegação falsa" if checagem["rotulo"] == "fake" else "Alegação verdadeira"
     classe = "falsa" if checagem["rotulo"] == "fake" else "verdadeira"
     st.markdown(
         f'<section class="resultado {classe}" role="status"><div>'
@@ -32,7 +33,9 @@ def mostrar_checagem(checagem):
     st.text(checagem["alegacao"])
     st.link_button("Ler a checagem no Boatos.org", checagem["url"])
     st.caption("O resultado acima foi extraído do selo de conclusão da página. "
-               "As previsões dos modelos abaixo se referem ao texto da checagem.")
+               "É a conclusão publicada pelo Boatos.org, não uma previsão do SVM.")
+    st.caption("A alegação examinada e o artigo que a explica são conteúdos diferentes. "
+               "Esta análise se refere à alegação exibida acima.")
 
 
 def mostrar_resultado(resultado, nome="TF-IDF + SVM"):
@@ -137,6 +140,17 @@ with coluna_entrada, st.container(border=True, key="painel_entrada"):
             texto = st.text_area("Texto da notícia", placeholder="Cole o conteúdo que você quer analisar…",
                                  height=220, max_chars=30000)
             enviar = st.form_submit_button("Analisar notícia", type="primary", use_container_width=True)
+        if enviar:
+            try:
+                url_colada = link_colado(titulo, texto)
+                if url_colada:
+                    with st.spinner("Lendo o link colado…"):
+                        noticia_extraida = extrair_noticia(url_colada)
+                        titulo, texto = noticia_extraida["titulo"], noticia_extraida["texto"]
+            except ErroLink as erro:
+                erro_link = str(erro)
+            except Exception:
+                erro_link = "Não foi possível ler esse link. Use a opção Usar um link ou cole o conteúdo da notícia."
     else:
         with st.form("link"):
             url = st.text_input("Link da notícia ou publicação", placeholder="https://site.com/noticia", max_chars=2048)
@@ -168,16 +182,25 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
     if erro_link:
         st.warning(erro_link)
     elif enviar:
+        checagem = noticia_extraida.get("checagem") if noticia_extraida else None
         if not (titulo.strip() or texto.strip()):
             st.warning("Cole o texto da notícia ou informe um título para continuar.")
+        elif checagem:
+            mostrar_checagem(checagem)
+        elif noticia_extraida and noticia_extraida.get("pagina_checagem"):
+            st.warning("Conclusão da checagem não identificada")
+            st.write("A página contém uma checagem, mas não encontramos um veredito explícito e único. "
+                     "Não é possível concluir se a alegação é falsa ou verdadeira por esta leitura.")
+            st.link_button("Consultar a página original", noticia_extraida["url"])
+        elif texto_parece_checagem(texto):
+            st.warning("O texto colado parece ser uma checagem")
+            st.write("Para analisar a alegação examinada pela fonte, envie o link da checagem. "
+                     "O texto colado mistura a alegação com a explicação; sua origem ainda não foi verificada.")
         elif all(m["tipo"] != "svm_leve" for m in opcoes[selecao]) and (motivo := avaliar_entrada(titulo, texto)):
             st.warning("Análise inconclusiva")
             st.write(motivo)
             st.caption("Nenhum escore de veracidade foi atribuído. A triagem usa regras de tamanho e conteúdo e também pode falhar.")
         else:
-            checagem = noticia_extraida.get("checagem") if noticia_extraida else None
-            if checagem:
-                mostrar_checagem(checagem)
             resultados = []
             with st.spinner("Analisando a notícia… O primeiro acesso pode levar alguns instantes."):
                 for modelo in opcoes[selecao]:
@@ -191,15 +214,7 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
             if len(resultados) != len(opcoes[selecao]) and resultados:
                 st.warning("Comparação incompleta: um dos modelos não pôde ser executado.")
             if resultados:
-                if checagem:
-                    if any(r["rotulo"] != checagem["rotulo"] for _, r in resultados):
-                        st.warning("Uma previsão dos modelos diverge da conclusão da fonte. "
-                                   "Os modelos avaliaram o texto da checagem e não verificaram os fatos da alegação.")
-                    with st.container(border=True):
-                        st.caption("Indícios dos modelos para o texto da checagem")
-                        mostrar_comparacao(resultados)
-                else:
-                    mostrar_comparacao(resultados)
+                mostrar_comparacao(resultados)
     else:
         st.markdown('''<div class="vazio"><div class="vazio-icone" aria-hidden="true"><span>◎</span></div>
         <h3>Todo resultado começa<br>com uma boa leitura.</h3>
@@ -209,7 +224,8 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
 
 with st.container(key="aviso_modelo"):
     st.info("Este é apenas um modelo de inteligência artificial e pode errar. "
-            "Não considere o resultado 100% certo. A classificação é binária e pode errar, especialmente em textos curtos. "
+            "Resultados atribuídos a uma fonte são conclusões publicadas por ela. "
+            "As previsões do SVM analisam padrões de texto e não verificam fatos. "
             "Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.")
 st.markdown('<div class="rodape"><span>Notícia em análise · Projeto acadêmico</span>'
-            '<span>TF-IDF + SVM · Revisão 2026.10.08-svm3</span></div>', unsafe_allow_html=True)
+            '<span>TF-IDF + SVM · Revisão 2026.10.09-checagem1</span></div>', unsafe_allow_html=True)

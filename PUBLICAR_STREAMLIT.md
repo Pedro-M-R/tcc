@@ -34,7 +34,7 @@ publicação, incluindo o modelo, sem base de treinamento ou checkpoints.
    `web/requirements.txt`. Esse arquivo fica ao lado do app, conforme a
    [documentação de dependências](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/app-dependencies).
 4. Abra o app e confirme a única opção **TF-IDF + SVM** e o rodapé
-   **2026.10.08-svm3**. Faça uma análise; abrir a página inicial não basta para
+   **2026.10.09-checagem1**. Faça uma análise; abrir a página inicial não basta para
    comprovar que o modelo carregou.
 
 Não use `requirements.txt` da raiz do projeto original para instalar o site:
@@ -60,5 +60,20 @@ retornam “Falsa” pela regra explícita de opinião pessoal, sem escore e
 sem atribuir esse resultado ao treinamento do SVM. Uma notícia que apenas
 contenha essa frase continua sendo classificada pelo modelo.
 Se um link bloquear a extração, cole o corpo da notícia.
+
+Links de checagens do Boatos.org com alegação e selo explícito exibem a
+conclusão da fonte sobre a alegação, sem executar o SVM no artigo de checagem.
+Isso funciona também quando uma URL isolada é colada no formulário de texto.
+Checagens reconhecidas sem conclusão única pedem consulta à página original.
+Um texto colado que pareça checagem pede o link; não autentica a fonte.
+
+Validação do site publicado, incluindo os dois casos reais nos dois formulários:
+
+```powershell
+.\.venv-svm\Scripts\python.exe validar_publicacao_svm.py
+```
+
+O relatório fica em `resultados/revisao_casos_reais/publicacao_checagem1.json`.
+Esta correção trata a leitura de checagens; não altera pesos nem limiar do SVM.
 
 Consulte [STREAMLIT_SVM.md](STREAMLIT_SVM.md) para métricas, limitações e retreino.

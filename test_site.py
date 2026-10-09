@@ -147,7 +147,8 @@ class TestSite(unittest.TestCase):
             self.assertFalse(any('class="anel"' in x.value for x in app.markdown))
             self.assertTrue(any(x.label == "Detalhes técnicos do modelo" for x in app.expander))
             self.assertEqual(app.metric[1].value, f"{(1 - prob_true) * 100:.2f}%".replace(".", ","))
-            self.assertIn("Não considere o resultado 100% certo", app.info[0].value)
+            self.assertIn("pode errar", app.info[0].value)
+            self.assertIn("não verificam fatos", app.info[0].value)
             # Nova submissão inválida não deve manter o resultado anterior.
             app.text_area[0].set_value(" ")
             app.text_input[0].set_value(" ")

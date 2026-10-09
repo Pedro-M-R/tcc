@@ -43,7 +43,7 @@ class TestChecagem(unittest.TestCase):
         html = pagina().replace("</article>", "<p>Verdadeiro</p></article>")
         self.assertIsNone(extrair_html(html, URL)["checagem"])
 
-    def test_interface_separa_fonte_e_modelo_sem_fabricar_percentual(self):
+    def test_interface_exibe_alegacao_sem_classificar_artigo_ou_fabricar_percentual(self):
         import streamlit as st
         from streamlit.testing.v1 import AppTest
         st.cache_resource.clear()
@@ -55,15 +55,92 @@ class TestChecagem(unittest.TestCase):
         app.selectbox[0].set_value("TF-IDF + SVM").run()
         app.radio[0].set_value("Usar um link").run()
         with patch("extrair_link.extrair_noticia", return_value=noticia):
-            with patch("inferencia.Classificador", return_value=modelo):
+            with patch("inferencia.Classificador", return_value=modelo) as carregar:
                 app.text_input[0].set_value(URL)
                 app.button[0].click().run()
         self.assertEqual(len(app.exception), 0)
-        self.assertTrue(any("A fonte contesta a alegação" in m.value and "Boatos.org" in m.value for m in app.markdown))
-        self.assertTrue(any("diverge" in w.value for w in app.warning))
-        self.assertEqual(app.metric[0].value, "99,90%")
-        self.assertTrue(any("texto da checagem" in e.value for e in app.caption))
+        self.assertTrue(any("Alegação falsa" in m.value and "Boatos.org" in m.value for m in app.markdown))
+        self.assertFalse(app.warning)
+        self.assertFalse(app.metric)
+        self.assertFalse(any("Há indícios de que seja verdadeira" in m.value for m in app.markdown))
+        self.assertTrue(any("não uma previsão do SVM" in e.value for e in app.caption))
+        carregar.assert_not_called()
+        modelo.analisar.assert_not_called()
         st.cache_resource.clear()
+
+    def test_link_colado_no_campo_de_texto_tambem_usa_checagem(self):
+        from streamlit.testing.v1 import AppTest
+        noticia = extrair_html(pagina(), URL)
+        app = AppTest.from_file(str(Path(__file__).resolve().parent / "web/app.py"), default_timeout=30).run()
+        with patch("extrair_link.extrair_noticia", return_value=noticia) as extrair, \
+             patch("inferencia.Classificador") as carregar:
+            app.text_area[0].set_value(URL)
+            app.button[0].click().run()
+        self.assertFalse(app.exception)
+        extrair.assert_called_once_with(URL)
+        carregar.assert_not_called()
+        self.assertTrue(any("Alegação falsa" in m.value for m in app.markdown))
+        self.assertFalse(app.metric)
+
+    def test_sem_selo_nao_usa_svm_para_inventar_conclusao(self):
+        from streamlit.testing.v1 import AppTest
+        noticia = extrair_html(pagina(selo="Verificação inconclusiva"), URL)
+        self.assertTrue(noticia["pagina_checagem"])
+        app = AppTest.from_file(str(Path(__file__).resolve().parent / "web/app.py"), default_timeout=30).run()
+        app.radio[0].set_value("Usar um link").run()
+        with patch("extrair_link.extrair_noticia", return_value=noticia), patch("inferencia.Classificador") as carregar:
+            app.text_input[0].set_value(URL)
+            app.button[0].click().run()
+        self.assertFalse(app.exception)
+        self.assertTrue(any("não identificada" in w.value for w in app.warning))
+        self.assertFalse(app.metric)
+        carregar.assert_not_called()
+
+    def test_texto_colado_de_checagem_nao_autentica_conclusao(self):
+        from streamlit.testing.v1 import AppTest
+        app = AppTest.from_file(str(Path(__file__).resolve().parent / "web/app.py"), default_timeout=30).run()
+        with patch("inferencia.Classificador") as carregar:
+            app.text_area[0].set_value("Boato - O parque vai fechar.\nChecagem\nRelato de investigação.\nConclusão\nFake news")
+            app.button[0].click().run()
+        self.assertFalse(app.exception)
+        self.assertTrue(any("parece ser uma checagem" in w.value for w in app.warning))
+        self.assertFalse(app.metric)
+        carregar.assert_not_called()
+
+    def test_conclusao_verdadeira_nao_vira_falsa_por_dominio(self):
+        from streamlit.testing.v1 import AppTest
+        noticia = extrair_html(pagina(selo="Verdadeiro"), URL)
+        app = AppTest.from_file(str(Path(__file__).resolve().parent / "web/app.py"), default_timeout=30).run()
+        app.radio[0].set_value("Usar um link").run()
+        with patch("extrair_link.extrair_noticia", return_value=noticia):
+            app.text_input[0].set_value(URL)
+            app.button[0].click().run()
+        self.assertFalse(app.exception)
+        self.assertTrue(any("Alegação verdadeira" in m.value for m in app.markdown))
+        self.assertFalse(any("Alegação falsa" in m.value for m in app.markdown))
+
+    @unittest.skipUnless(all((Path("resultados/revisao_casos_reais") / (nome + ".html")).exists()
+                             for nome in ("eduarda", "tse")), "Exige HTML público salvo no diagnóstico local")
+    def test_dois_links_reais_sem_rede_e_sem_inferir_sobre_artigo(self):
+        import json
+        from streamlit.testing.v1 import AppTest
+        pasta = Path("resultados/revisao_casos_reais")
+        for nome in ("eduarda", "tse"):
+            with self.subTest(caso=nome):
+                metadados = json.loads((pasta / (nome + ".json")).read_text(encoding="utf-8"))
+                noticia = extrair_html((pasta / (nome + ".html")).read_bytes(), metadados["url"])
+                self.assertEqual(noticia["checagem"]["rotulo"], "fake")
+                app = AppTest.from_file(str(Path(__file__).resolve().parent / "web/app.py"), default_timeout=30).run()
+                app.radio[0].set_value("Usar um link").run()
+                with patch("extrair_link.extrair_noticia", return_value=noticia), patch("inferencia.Classificador") as carregar:
+                    app.text_input[0].set_value(metadados["url"])
+                    app.button[0].click().run()
+                self.assertFalse(app.exception)
+                self.assertFalse(app.error)
+                self.assertFalse(app.metric)
+                self.assertTrue(any("Alegação falsa" in m.value for m in app.markdown))
+                self.assertFalse(any("Há indícios de que seja verdadeira" in m.value for m in app.markdown))
+                carregar.assert_not_called()
 
 
 if __name__ == "__main__":

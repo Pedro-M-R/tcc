@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "web"))
-from extrair_link import ErroLink, baixar_html, extrair_html, validar_destino
+from extrair_link import ErroLink, baixar_html, extrair_html, validar_destino, link_colado
 
 
 def dns(ip):
@@ -15,6 +15,14 @@ def dns(ip):
 
 
 class TestLinks(unittest.TestCase):
+    def test_url_isolada_e_links_multiplos(self):
+        self.assertEqual(link_colado("", "https://example.com/a"), "https://example.com/a")
+        self.assertEqual(link_colado("https://example.com/a", "https://example.com/a"), "https://example.com/a")
+        self.assertIsNone(link_colado("Notícia", "O relato menciona https://example.com/a"))
+        self.assertIsNone(link_colado("", ""))
+        with self.assertRaisesRegex(ErroLink, "um link por vez"):
+            link_colado("", "https://example.com/a https://example.com/b")
+
     def test_nao_aceita_esquemas_e_credenciais(self):
         for url in ("", "file:///etc/passwd", "ftp://example.com", "https://u:p@example.com", "https://example.com:8080"):
             with self.subTest(url=url), self.assertRaises(ErroLink):

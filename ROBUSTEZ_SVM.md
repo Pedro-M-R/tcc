@@ -166,3 +166,23 @@ A revisão foi publicada em `tccpedro.streamlit.app` e validada ao vivo em
 atribuída ao Boatos.org, tanto em “Usar um link” quanto quando a URL é colada
 no campo de texto. Nenhum escore do SVM é exibido nesses quatro cenários.
 O registro local está em `resultados/revisao_casos_reais/publicacao_checagem1.json`.
+
+## Triagem de contexto no site — revisão `2026.10.09-triagem1`
+
+A triagem existente em `triagem_noticias.py` estava sendo ignorada pelo SVM na
+interface. Agora ela também é aplicada antes de carregar esse modelo. O exemplo
+“elefante rosa no ceara”, inclusive no título ou repetido muitas vezes, retorna
+“Análise inconclusiva”, pede contexto e não recebe escore de veracidade.
+
+O filtro exige corpo com 40 palavras, ao menos 20 distintas e sinais de contexto
+noticioso; também trata repetição e alguns padrões de opinião/instrução. A regra
+preexistente de opinião pessoal do aplicativo permanece separada. Checagens com
+conclusão explícita continuam seguindo o fluxo atribuído à fonte.
+
+Esses limites são heurísticos e podem rejeitar notícias legítimas curtas ou
+aceitar textos inventados com aparência de notícia. Não é um detector semântico
+de absurdos. Pesos, limiar, classificador bruto e métricas de treinamento não
+mudaram; as métricas antigas não avaliam a cobertura deste filtro da interface.
+`test_svm_leve.py` verifica as entradas bloqueadas sem carregar o SVM e permite
+um relato contextualizado. A validação remota é salva em
+`resultados/revisao_casos_reais/publicacao_triagem1.json`.

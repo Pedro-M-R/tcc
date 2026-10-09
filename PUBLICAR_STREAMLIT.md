@@ -34,7 +34,7 @@ publicação, incluindo o modelo, sem base de treinamento ou checkpoints.
    `web/requirements.txt`. Esse arquivo fica ao lado do app, conforme a
    [documentação de dependências](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/app-dependencies).
 4. Abra o app e confirme a única opção **TF-IDF + SVM** e o rodapé
-   **2026.10.09-checagem1**. Faça uma análise; abrir a página inicial não basta para
+   **2026.10.09-triagem1**. Faça uma análise; abrir a página inicial não basta para
    comprovar que o modelo carregou.
 
 Não use `requirements.txt` da raiz do projeto original para instalar o site:
@@ -53,8 +53,12 @@ Não há download de pesos ao abrir o site. `TCC_MODEL_PATH` e
 Para testar outro SVM treinado por `treinar_svm_leve.py`, configure
 `TCC_SVM_MODEL_PATH` com o caminho da pasta desse modelo.
 
-O SVM classifica textos preenchidos em `fake` ou `true`, sem abstenção por
-tamanho, domínio ou limiar de confiança. Entradas vazias pedem preenchimento.
+O site faz triagem antes de executar o SVM: exige corpo de notícia com pelo
+menos 40 palavras, 20 palavras distintas e sinais de contexto noticioso.
+Entradas insuficientes ou repetitivas retornam “Análise inconclusiva”, sem
+carregar o modelo e sem atribuir escore. Título repetido não aumenta o contexto.
+O classificador estatístico, usado após essa triagem, continua binário.
+Entradas vazias pedem preenchimento.
 Frases inteiras como “pedro eh bonito”, também repetidas no título e no texto,
 retornam “Falsa” pela regra explícita de opinião pessoal, sem escore e
 sem atribuir esse resultado ao treinamento do SVM. Uma notícia que apenas
@@ -73,7 +77,10 @@ Validação do site publicado, incluindo os dois casos reais nos dois formulári
 .\.venv-svm\Scripts\python.exe validar_publicacao_svm.py
 ```
 
-O relatório fica em `resultados/revisao_casos_reais/publicacao_checagem1.json`.
-Esta correção trata a leitura de checagens; não altera pesos nem limiar do SVM.
+O relatório fica em `resultados/revisao_casos_reais/publicacao_triagem1.json`.
+A validação inclui frases soltas como “elefante rosa no ceara”, título isolado,
+repetição e notícia contextualizada. A triagem usa regras heurísticas; não
+detecta toda invenção nem comprova a veracidade de textos que passam por ela.
+As correções não alteram pesos nem limiar do SVM.
 
 Consulte [STREAMLIT_SVM.md](STREAMLIT_SVM.md) para métricas, limitações e retreino.

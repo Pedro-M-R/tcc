@@ -11,6 +11,7 @@ from extrair_link import ErroLink, extrair_noticia, link_colado
 from checagem import texto_parece_checagem
 from apresentacao import formatar_probabilidade
 from triagem_noticias import INDICIOS, avaliar_entrada
+from svm_leve import opiniao_pessoal
 
 
 st.set_page_config(page_title="Notícia em análise", page_icon="📰", layout="wide")
@@ -139,6 +140,8 @@ with coluna_entrada, st.container(border=True, key="painel_entrada"):
             titulo = st.text_input("Título da notícia (opcional)", placeholder="Qual é a manchete?", max_chars=500)
             texto = st.text_area("Texto da notícia", placeholder="Cole o conteúdo que você quer analisar…",
                                  height=220, max_chars=30000)
+            st.caption("Envie o corpo da notícia com pelo menos 40 palavras e contexto do acontecimento. "
+                       "Frases soltas e títulos isolados podem resultar em análise inconclusiva.")
             enviar = st.form_submit_button("Analisar notícia", type="primary", use_container_width=True)
         if enviar:
             try:
@@ -196,7 +199,9 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
             st.warning("O texto colado parece ser uma checagem")
             st.write("Para analisar a alegação examinada pela fonte, envie o link da checagem. "
                      "O texto colado mistura a alegação com a explicação; sua origem ainda não foi verificada.")
-        elif all(m["tipo"] != "svm_leve" for m in opcoes[selecao]) and (motivo := avaliar_entrada(titulo, texto)):
+        elif (motivo := avaliar_entrada(titulo, texto)) and not (
+            all(m["tipo"] == "svm_leve" for m in opcoes[selecao]) and opiniao_pessoal(titulo, texto)
+        ):
             st.warning("Análise inconclusiva")
             st.write(motivo)
             st.caption("Nenhum escore de veracidade foi atribuído. A triagem usa regras de tamanho e conteúdo e também pode falhar.")
@@ -228,4 +233,4 @@ with st.container(key="aviso_modelo"):
             "As previsões do SVM analisam padrões de texto e não verificam fatos. "
             "Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.")
 st.markdown('<div class="rodape"><span>Notícia em análise · Projeto acadêmico</span>'
-            '<span>TF-IDF + SVM · Revisão 2026.10.09-checagem1</span></div>', unsafe_allow_html=True)
+            '<span>TF-IDF + SVM · Revisão 2026.10.09-triagem1</span></div>', unsafe_allow_html=True)

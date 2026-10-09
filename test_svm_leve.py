@@ -15,6 +15,7 @@ from svm_leve import ModeloSVMLeve, opiniao_pessoal
 from preparacao_noticias import preparar_noticia
 from web.inferencia import Classificador, modelos_do_site
 from test_triagem import NOTICIA
+from triagem_noticias import avaliar_entrada
 
 RAIZ = Path(__file__).resolve().parent
 MODELO = Path(os.environ.get("TCC_SVM_MODEL_PATH", RAIZ / "modelos/svm_leve")).resolve()
@@ -101,8 +102,54 @@ print('CPU OK')
         app.button[0].click().run()
         self.assertFalse(app.exception)
         self.assertFalse(app.error)
-        self.assertFalse(app.warning)
-        self.assertEqual(len(app.metric), 2)
+        self.assertTrue(any(w.value == "Análise inconclusiva" for w in app.warning))
+        self.assertFalse(app.metric)
+
+    def test_triagem_site_bloqueia_frases_soltas_sem_carregar_svm(self):
+        import streamlit as st
+        from streamlit.testing.v1 import AppTest
+        st.cache_resource.clear()
+        self.addCleanup(st.cache_resource.clear)
+        sys.path.insert(0, str(RAIZ / "web"))
+        app = AppTest.from_file(str(RAIZ / "web/app.py"), default_timeout=30).run()
+        frase = "elefante rosa no ceara"
+        for titulo, texto in (("", frase), (frase, ""), (frase, frase),
+                              ("", "ELEFANTE ROSA NO CEARÁ!"),
+                              ("", (frase + ". ") * 30),
+                              ("", "gato azul na lua")):
+            with self.subTest(titulo=titulo, texto=texto), patch("inferencia.Classificador") as carregar:
+                app.text_input[0].set_value(titulo)
+                app.text_area[0].set_value(texto)
+                app.button[0].click().run()
+                self.assertFalse(app.exception)
+                self.assertFalse(app.error)
+                self.assertTrue(any(w.value == "Análise inconclusiva" for w in app.warning))
+                self.assertFalse(app.metric)
+                self.assertFalse(any('<h2>' in m.value for m in app.markdown))
+                carregar.assert_not_called()
+        with patch("inferencia.Classificador") as carregar:
+            carregar.return_value.analisar.return_value = {
+                "rotulo": "true", "calibrado": True,
+                "probabilidades": {"fake": .2, "true": .8}}
+            app.text_input[0].set_value("Biblioteca abre na segunda")
+            app.text_area[0].set_value(NOTICIA)
+            app.button[0].click().run()
+            self.assertFalse(app.exception)
+            self.assertFalse(app.warning)
+            self.assertEqual(len(app.metric), 2)
+            carregar.return_value.analisar.assert_called_once_with("Biblioteca abre na segunda", NOTICIA)
+        st.cache_resource.clear()
+        app.radio[0].set_value("Usar um link").run()
+        with patch("extrair_link.extrair_noticia", return_value={
+            "titulo": frase, "texto": (frase + ". ") * 30,
+            "url": "https://example.org/noticia", "texto_limitado": False
+        }), patch("inferencia.Classificador") as carregar:
+            app.text_input[0].set_value("https://example.org/noticia")
+            app.button[0].click().run()
+            self.assertFalse(app.exception)
+            self.assertTrue(any(w.value == "Análise inconclusiva" for w in app.warning))
+            self.assertFalse(app.metric)
+            carregar.assert_not_called()
 
     def test_cache_recarrega_apos_atualizar_artefatos_na_mesma_pasta(self):
         import streamlit as st
@@ -154,8 +201,12 @@ print('CPU OK')
         sys.path.insert(0, str(RAIZ / "web"))
         base = pd.read_csv(RAIZ / "resultados/bases/base_atualizada_2026-10-06.csv", keep_default_na=False)
         previsoes = pd.read_csv(MODELO / "predicoes_teste.csv")
-        linha = previsoes[previsoes.resultado != "inconclusivo"].iloc[0]
-        noticia = base.iloc[int(linha.linha_csv) - 2]
+        # Este teste mede a paridade de texto/link com uma notícia que passa
+        # pela triagem. Corpos insuficientes têm regressão própria acima.
+        noticia = next(n for linha in previsoes.itertuples()
+                       if linha.resultado != "inconclusivo"
+                       for n in [base.iloc[int(linha.linha_csv) - 2]]
+                       if avaliar_entrada(n.titulo[:500], n.texto[:30000]) is None)
         app = AppTest.from_file(str(RAIZ / 'web/app.py'), default_timeout=30).run()
         self.assertFalse(app.exception)
         self.assertEqual(app.selectbox[0].options, ["TF-IDF + SVM"])

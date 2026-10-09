@@ -1,5 +1,18 @@
 # Notícia em análise — TF-IDF + SVM binário
 
+**Atualização do site em 09/10/2026 — `triagem1`:** a triagem de contexto agora
+também se aplica ao SVM. Frases soltas, títulos isolados e conteúdo repetitivo
+retornam “Análise inconclusiva”, sem escore. Envie corpo de notícia com pelo
+menos 40 palavras, variedade de palavras e contexto do acontecimento.
+O filtro é heurístico; uma entrada aceita ainda pode ser inventada.
+Conclusões explícitas de checagens continuam atribuídas à fonte e a regra
+preexistente de opinião pessoal permanece separada. As descrições de ausência
+de abstenção abaixo são históricas ou se referem ao classificador bruto.
+
+**Revisão do treinamento em 09/10/2026:** consulte [ROBUSTEZ_SVM.md](ROBUSTEZ_SVM.md)
+para validação cruzada, entradas curtas, limiar de decisão e novos relatórios.
+Os números e o procedimento abaixo descrevem a versão anterior, svm3.
+
 A revisão **2026.10.08-svm3** classifica entradas preenchidas em `fake` ou
 `true`, sem abstenção por tamanho, domínio ou escore. Não carrega BERTimbau.
 O modelo padrão continua em `modelos/svm_leve`, executado em CPU.
@@ -15,7 +28,7 @@ continuam sendo analisadas pelo modelo.
 
 Abra `abrir_site.cmd` e acesse http://localhost:8501.
 Escolha **Colar título e texto** ou **Usar um link**. Textos curtos e títulos
-isolados também recebem classificação. Uma entrada vazia pede preenchimento.
+isolados pedem mais contexto. Uma entrada vazia pede preenchimento.
 
 Em outra instalação, use Python 3.13 para reproduzir o ambiente validado:
 

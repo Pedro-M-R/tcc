@@ -38,16 +38,16 @@ def verificar(url, titulo=None, texto=None, link=None):
         ws.send(pedido.SerializeToString())
         elementos = receber(ws)
         radio_id = None
-        radio_indice = None
+        radio_valor = None
         if link is not None:
             radios = [d.get('newElement', {}).get('radio', {}) for d in elementos]
             radio = next(r for r in radios if 'Usar um link' in r.get('options', []))
             radio_id = radio['id']
-            radio_indice = radio['options'].index('Usar um link')
+            radio_valor = 'Usar um link'
             pedido = BackMsg()
             widget = pedido.rerun_script.widget_states.widgets.add()
             widget.id = radio_id
-            widget.int_value = radio_indice
+            widget.string_value = radio_valor
             ws.send(pedido.SerializeToString())
             elementos = receber(ws)
         if titulo is not None or texto is not None or link is not None:
@@ -60,13 +60,13 @@ def verificar(url, titulo=None, texto=None, link=None):
                         campos[tipo] = e[tipo]['id']
             esperados = {'textInput', 'button'} if link is not None else {'textInput', 'textArea', 'button'}
             if set(campos) != esperados:
-                raise ValueError('O formulário de análise não foi encontrado no app remoto.')
+                raise ValueError(f'O formulário {formulario} não foi encontrado no app remoto.')
             pedido = BackMsg()
             pedido.rerun_script.query_string = ''
             if radio_id is not None:
                 widget = pedido.rerun_script.widget_states.widgets.add()
                 widget.id = radio_id
-                widget.int_value = radio_indice
+                widget.string_value = radio_valor
             valores = [('textInput', link)] if link is not None else [('textInput', titulo or ''), ('textArea', texto or '')]
             for tipo, valor in valores:
                 widget = pedido.rerun_script.widget_states.widgets.add()

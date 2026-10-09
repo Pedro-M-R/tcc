@@ -160,3 +160,9 @@ selos ausentes/conflitantes e texto colado sem origem autenticada.
 além das entradas comuns. Esses testes validam o fluxo da aplicação; não
 constituem evidência de melhora na generalização do SVM. Pesos, limiar e métricas
 de treinamento permanecem os mesmos nesta correção.
+
+A revisão foi publicada em `tccpedro.streamlit.app` e validada ao vivo em
+09/10/2026: sete cenários passaram. Os dois links mostram “Alegação falsa”,
+atribuída ao Boatos.org, tanto em “Usar um link” quanto quando a URL é colada
+no campo de texto. Nenhum escore do SVM é exibido nesses quatro cenários.
+O registro local está em `resultados/revisao_casos_reais/publicacao_checagem1.json`.

@@ -1,0 +1,327 @@
+{
+  "fake": [
+    {
+      "atributo": "palavras__bolsonaro partido",
+      "peso": -2.1484059234951265
+    },
+    {
+      "atributo": "palavras__presidente jair",
+      "peso": -1.9969157992717248
+    },
+    {
+      "atributo": "palavras__feira",
+      "peso": -1.669564158918347
+    },
+    {
+      "atributo": "palavras__hoje",
+      "peso": -1.663484199802314
+    },
+    {
+      "atributo": "palavras__jair",
+      "peso": -1.614697009462798
+    },
+    {
+      "atributo": "palavras__da coisa",
+      "peso": -1.5642258383057268
+    },
+    {
+      "atributo": "palavras__jair bolsonaro",
+      "peso": -1.5467771706144653
+    },
+    {
+      "atributo": "palavras__2022",
+      "peso": -1.425189627652562
+    },
+    {
+      "atributo": "palavras__uol",
+      "peso": -1.3684142787222136
+    },
+    {
+      "atributo": "palavras__nesta",
+      "peso": -1.3484528453974165
+    },
+    {
+      "atributo": "palavras__news",
+      "peso": -1.283266524237107
+    },
+    {
+      "atributo": "palavras__tema contato",
+      "peso": -1.2389378802458988
+    },
+    {
+      "atributo": "palavras__leitores quiser",
+      "peso": -1.2389378802458988
+    },
+    {
+      "atributo": "palavras__historia",
+      "peso": -1.1713745481520352
+    },
+    {
+      "atributo": "palavras__mais",
+      "peso": -1.1456957357273292
+    },
+    {
+      "atributo": "palavras__sugestao leitores",
+      "peso": -1.1399445030742297
+    },
+    {
+      "atributo": "palavras__leitores",
+      "peso": -1.1360932959343837
+    },
+    {
+      "atributo": "palavras__oque",
+      "peso": -1.1296998175575987
+    },
+    {
+      "atributo": "palavras__ps artigo",
+      "peso": -1.1050458396254612
+    },
+    {
+      "atributo": "palavras__ontem",
+      "peso": -1.0777882936269594
+    },
+    {
+      "atributo": "palavras__quiser",
+      "peso": -1.0772308734307066
+    },
+    {
+      "atributo": "palavras__ps",
+      "peso": -1.0731281585274206
+    },
+    {
+      "atributo": "palavras__federal",
+      "peso": -1.0404989021024387
+    },
+    {
+      "atributo": "palavras__stf supremo",
+      "peso": -1.0388015170728018
+    },
+    {
+      "atributo": "palavras__acordo",
+      "peso": -1.0208445033783013
+    },
+    {
+      "atributo": "palavras__cpi",
+      "peso": -1.0179907597850713
+    },
+    {
+      "atributo": "palavras__artigo sugestao",
+      "peso": -1.0175199182212042
+    },
+    {
+      "atributo": "palavras__contato gente",
+      "peso": -1.016089352722228
+    },
+    {
+      "atributo": "palavras__sugerir tema",
+      "peso": -1.016089352722228
+    },
+    {
+      "atributo": "palavras__quiser sugerir",
+      "peso": -1.016089352722228
+    },
+    {
+      "atributo": "palavras__leia integra",
+      "peso": -1.0083368526731098
+    },
+    {
+      "atributo": "palavras__aplicativo",
+      "peso": -1.0052083972856936
+    },
+    {
+      "atributo": "caracteres__es ",
+      "peso": -0.994528244418779
+    },
+    {
+      "atributo": "palavras__sugestao",
+      "peso": -0.9824705032817893
+    },
+    {
+      "atributo": "palavras__alta",
+      "peso": -0.9770791465499766
+    },
+    {
+      "atributo": "caracteres__ou ",
+      "peso": -0.9693066658293648
+    },
+    {
+      "atributo": "palavras__supremo",
+      "peso": -0.9670558690621992
+    },
+    {
+      "atributo": "caracteres__os ",
+      "peso": -0.9473820501693214
+    },
+    {
+      "atributo": "palavras__whatsapp",
+      "peso": -0.9418475644698379
+    },
+    {
+      "atributo": "palavras__https",
+      "peso": -0.9327223992312366
+    }
+  ],
+  "true": [
+    {
+      "atributo": "palavras__post",
+      "peso": 1.4493979338236955
+    },
+    {
+      "atributo": "palavras__video",
+      "peso": 1.428192795092325
+    },
+    {
+      "atributo": "palavras__pl",
+      "peso": 1.2446343024573567
+    },
+    {
+      "atributo": "palavras__bolsonaro pl",
+      "peso": 1.2111589770782285
+    },
+    {
+      "atributo": "palavras__foi",
+      "peso": 1.2061338183585706
+    },
+    {
+      "atributo": "palavras__org",
+      "peso": 1.1593034894825467
+    },
+    {
+      "atributo": "palavras__na",
+      "peso": 1.1285436726463223
+    },
+    {
+      "atributo": "palavras__povo",
+      "peso": 1.1098860183504782
+    },
+    {
+      "atributo": "palavras__foto",
+      "peso": 1.0715773830097335
+    },
+    {
+      "atributo": "palavras__urgente",
+      "peso": 1.0593062227809373
+    },
+    {
+      "atributo": "palavras__pt",
+      "peso": 1.0491934679190935
+    },
+    {
+      "atributo": "palavras__engana",
+      "peso": 1.0358137391571924
+    },
+    {
+      "atributo": "palavras__acaba",
+      "peso": 1.0023939462407307
+    },
+    {
+      "atributo": "palavras__antes",
+      "peso": 0.9847160780244847
+    },
+    {
+      "atributo": "palavras__postagem",
+      "peso": 0.9570369649248613
+    },
+    {
+      "atributo": "palavras__dilma",
+      "peso": 0.9542919097092695
+    },
+    {
+      "atributo": "palavras__lula",
+      "peso": 0.9542783204154467
+    },
+    {
+      "atributo": "palavras__candidato",
+      "peso": 0.9401705824882041
+    },
+    {
+      "atributo": "palavras__mostra",
+      "peso": 0.9351612973384225
+    },
+    {
+      "atributo": "palavras__no twitter",
+      "peso": 0.9082910714665721
+    },
+    {
+      "atributo": "palavras__brasil",
+      "peso": 0.9072988028563097
+    },
+    {
+      "atributo": "palavras__presidente bolsonaro",
+      "peso": 0.901063104645922
+    },
+    {
+      "atributo": "palavras__assessoria",
+      "peso": 0.8979681331935284
+    },
+    {
+      "atributo": "palavras__marina",
+      "peso": 0.8908364044619321
+    },
+    {
+      "atributo": "palavras__previdencia",
+      "peso": 0.8721627515059163
+    },
+    {
+      "atributo": "palavras__engana ao",
+      "peso": 0.8624961732079628
+    },
+    {
+      "atributo": "palavras__tenha",
+      "peso": 0.8609579782401885
+    },
+    {
+      "atributo": "palavras__sao",
+      "peso": 0.8576224571448213
+    },
+    {
+      "atributo": "palavras__mostra video",
+      "peso": 0.8558198844932714
+    },
+    {
+      "atributo": "palavras__nao",
+      "peso": 0.8501684603566115
+    },
+    {
+      "atributo": "palavras__salario",
+      "peso": 0.807791466983563
+    },
+    {
+      "atributo": "palavras__2026",
+      "peso": 0.8059676878756644
+    },
+    {
+      "atributo": "palavras__desespera",
+      "peso": 0.8041709742467651
+    },
+    {
+      "atributo": "palavras__fica",
+      "peso": 0.7840731479832957
+    },
+    {
+      "atributo": "palavras__em",
+      "peso": 0.7810344918629344
+    },
+    {
+      "atributo": "palavras__pel",
+      "peso": 0.7749213571751965
+    },
+    {
+      "atributo": "palavras__fica dificil",
+      "peso": 0.7722150907649463
+    },
+    {
+      "atributo": "palavras__video publicado",
+      "peso": 0.7657497181818425
+    },
+    {
+      "atributo": "palavras__convencao",
+      "peso": 0.764753939342851
+    },
+    {
+      "atributo": "palavras__assim fica",
+      "peso": 0.7575016108385765
+    }
+  ],
+  "nota": "Associações lineares, não prova de vazamento ou causalidade. Revise usando treino/validação; não ajuste a limpeza pelos resultados do teste."
+}

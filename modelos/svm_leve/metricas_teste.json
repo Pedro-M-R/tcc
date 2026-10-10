@@ -1,59 +1,53 @@
 {
   "total": 1042,
+  "acuracia_sem_abstencao": 0.9452975047984645,
+  "f1_macro_sem_abstencao": 0.9449812556101167,
+  "brier_multiclasse": 0.08273958865546771,
+  "aceitos": 1042,
+  "abstencoes": 0,
+  "cobertura": 1.0,
+  "acuracia_aceitos": 0.9452975047984645,
   "ordem_classes": [
     "fake",
     "true"
   ],
-  "acuracia_sem_abstencao": 0.9241842610364683,
-  "f1_macro_sem_abstencao": 0.9238695059073778,
-  "f2_fake": 0.9184091840918409,
   "matriz_confusao_sem_abstencao": [
     [
-      448,
-      40
+      453,
+      35
     ],
     [
-      39,
-      515
+      22,
+      532
     ]
   ],
+  "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro.",
+  "escopo": "Classificador estatístico nas notícias; regra de opinião avaliada em testes separados.",
   "por_classe_sem_abstencao": {
     "fake": {
-      "precision": 0.919917864476386,
-      "recall": 0.9180327868852459,
-      "f1-score": 0.918974358974359,
+      "precision": 0.9536842105263158,
+      "recall": 0.9282786885245902,
+      "f1-score": 0.940809968847352,
       "support": 488.0
     },
     "true": {
-      "precision": 0.9279279279279279,
-      "recall": 0.9296028880866426,
-      "f1-score": 0.9287646528403968,
+      "precision": 0.9382716049382716,
+      "recall": 0.9602888086642599,
+      "f1-score": 0.9491525423728814,
       "support": 554.0
     },
-    "accuracy": 0.9241842610364683,
+    "accuracy": 0.9452975047984645,
     "macro avg": {
-      "precision": 0.923922896202157,
-      "recall": 0.9238178374859443,
-      "f1-score": 0.9238695059073778,
+      "precision": 0.9459779077322936,
+      "recall": 0.9442837485944251,
+      "f1-score": 0.9449812556101167,
       "support": 1042.0
     },
     "weighted avg": {
-      "precision": 0.9241765738354591,
-      "recall": 0.9241842610364683,
-      "f1-score": 0.9241795631987207,
+      "precision": 0.9454897925841118,
+      "recall": 0.9452975047984645,
+      "f1-score": 0.9452454637927871,
       "support": 1042.0
     }
-  },
-  "distribuicao_previsoes": {
-    "fake": 487,
-    "true": 555
-  },
-  "colapso_uma_classe": false,
-  "baseline_majoritaria": 0.5316698656429942,
-  "aceitos": 1042,
-  "abstencoes": 0,
-  "cobertura": 1.0,
-  "acuracia_aceitos": 0.9241842610364683,
-  "nota": "Amostra interna reutilizada; não é avaliação externa nem garantia de factualidade.",
-  "brier_multiclasse": 0.11742920823595897
+  }
 }

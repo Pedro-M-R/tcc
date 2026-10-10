@@ -1,5 +1,7 @@
 # Notícia em análise — TF-IDF + SVM binário
 
+Limpeza no Pipeline, ablação e avaliação por fontes: [guia de limpeza do SVM](LIMPEZA_SVM.md).
+
 A revisão **2026.10.08-svm3** classifica entradas preenchidas em `fake` ou
 `true`, sem abstenção por tamanho, domínio ou escore. Não carrega BERTimbau.
 O modelo padrão continua em `modelos/svm_leve`, executado em CPU.

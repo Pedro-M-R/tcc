@@ -46,6 +46,10 @@ class ModeloSVMLeve:
         self.politica = json.loads((self.pasta / "politica_decisao.json").read_text(encoding="utf-8"))
         if self.politica.get("preparacao") != VERSAO_PREPARACAO:
             raise ValueError("Preparação do modelo incompatível com a aplicação.")
+        if self.politica.get("entrada_pipeline") == "bruta":
+            from treinamento_local.limpeza import VERSAO_LIMPEZA
+            if self.politica.get("limpeza") not in (None, VERSAO_LIMPEZA):
+                raise ValueError("Versão da limpeza incompatível; retreine o modelo com a limpeza atual.")
         self.modelo = joblib.load(self.pasta / "modelo.joblib")
         self.calibrador = joblib.load(self.pasta / "calibrador.joblib")
         if list(self.modelo.classes_) != [0, 1] or list(self.calibrador.classes_) != [0, 1]:
@@ -66,7 +70,15 @@ class ModeloSVMLeve:
                     "origem": "regra_opiniao",
                     "motivo": "Opinião pessoal classificada como falsa por uma regra do aplicativo. "
                               "Não é uma previsão do SVM nem uma verificação objetiva."}
-        entrada = preparar_noticia(titulo, texto)
+        if getattr(self, "politica", {}).get("entrada_pipeline") == "bruta":
+            entrada = f"{titulo}\n{texto}"
+            from treinamento_local.limpeza import limpar_texto, VERSAO_LIMPEZA
+            if self.politica.get("limpeza") == VERSAO_LIMPEZA and not limpar_texto(entrada):
+                raise ValueError("Não restou texto para o SVM analisar após a limpeza.")
+        else:
+            entrada = preparar_noticia(titulo, texto)
+        if not entrada:
+            raise ValueError("Não restou texto para o SVM analisar. Para uma URL, use o leitor de links.")
         probs = self.escores([entrada])[0]
         limiar = self.politica.get("limiar_fake", .5)
         indice = int(decidir(probs.reshape(1, -1), limiar)[0])

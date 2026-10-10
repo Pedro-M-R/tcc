@@ -21,7 +21,8 @@ from sklearn.svm import LinearSVC
 
 from dados_modelos import salvar_json
 from preparacao_noticias import VERSAO_PREPARACAO
-from treinamento_local.dados import carregar, dividir
+from treinamento_local.vazamento_svm import carregar_svm, dividir_svm, relatorio_atributos
+from treinamento_local.limpeza import limpar_texto, VERSAO_LIMPEZA
 from treinamento_local.calibracao import avaliar
 
 
@@ -38,12 +39,13 @@ CONFIGURACOES = [
 
 
 def vetorizador(config):
+    preprocessor = limpar_texto if config.get("limpeza", True) else None
     palavras = TfidfVectorizer(ngram_range=(1, config["ordem_palavras"]), min_df=2, max_df=.98,
                               max_features=config["palavras"], sublinear_tf=True,
-                              strip_accents="unicode", dtype=np.float32)
+                              preprocessor=preprocessor, strip_accents="unicode", dtype=np.float32)
     letras = TfidfVectorizer(analyzer="char_wb", ngram_range=config["ordem_caracteres"], min_df=3,
                             max_features=config["caracteres"], sublinear_tf=True,
-                            strip_accents="unicode", dtype=np.float32)
+                            preprocessor=preprocessor, strip_accents="unicode", dtype=np.float32)
     return FeatureUnion([("palavras", palavras), ("caracteres", letras)],
                         transformer_weights={"palavras": 1.0, "caracteres": config["peso_caracteres"]}, n_jobs=1)
 
@@ -54,16 +56,20 @@ def main(argv=None):
     p.add_argument("--saida", type=Path, default=Path("modelos/svm_leve"))
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--perfil", choices=("leve", "completo"), default="completo")
+    p.add_argument("--sem-limpeza", action="store_true", help="Controle de ablação com texto original")
+    p.add_argument("--separacao", choices=("grupo", "fonte"), default="grupo")
+    p.add_argument("--validar-dados", action="store_true", help="Audita fontes e partições sem treinar")
     a = p.parse_args(argv)
     if a.saida.exists() and any(a.saida.iterdir()):
         p.error("Saída ocupada; escolha uma nova pasta para preservar o modelo anterior.")
     inicio = time.perf_counter()
     print("Preparando base e separação por grupos…", flush=True)
-    df, rotulos, auditoria = carregar(a.csv, "noticia")
+    df, rotulos, auditoria = carregar_svm(a.csv, a.separacao)
     if rotulos != ["fake", "true"]:
         p.error("Este SVM exige classes fake e true.")
-    partes, divisao = dividir(df, a.seed)
     a.saida.mkdir(parents=True, exist_ok=True)
+    salvar_json(a.saida / "auditoria_vazamento.json", auditoria)
+    partes, divisao = dividir_svm(df, a.seed, a.separacao)
     salvar_json(a.saida / "manifesto.json", {"modelo": "TF-IDF + LinearSVC binário calibrado",
                 "dados": auditoria, "divisao": divisao,
                 "usos": {"busca": ["treino", "selecao"], "escolha": ["validacao"],
@@ -71,12 +77,16 @@ def main(argv=None):
                          "calibracao": ["calibracao"], "avaliacao_final": ["teste"]},
                 "argumentos": {k: str(v) if isinstance(v, Path) else v for k, v in vars(a).items()}})
     print({k: len(v) for k, v in partes.items()}, flush=True)
+    if a.validar_dados:
+        print("Dados validados; nenhum modelo treinado.", flush=True)
+        return
     # A antiga partição de seleção de abstenção agora faz parte do treino.
     # Calibração e teste continuam isolados, com os mesmos grupos de antes.
     treino = pd.concat([partes["treino"], partes["selecao"]])
     validacao = partes["validacao"]
     melhor_f1, escolha, candidatos = -1.0, None, []
     configs = CONFIGURACOES if a.perfil == "completo" else CONFIGURACOES[:1]
+    configs = [{**c, "limpeza": not a.sem_limpeza} for c in configs]
     valores_c = (.25, 1., 4., 10.) if a.perfil == "completo" else (.25, 1., 4.)
     pesos = ("balanced", None) if a.perfil == "completo" else ("balanced",)
     for config in configs:
@@ -115,6 +125,7 @@ def main(argv=None):
     if any(issubclass(w.category, ConvergenceWarning) for w in avisos):
         raise RuntimeError("O ajuste final não convergiu; o modelo não será marcado como concluído.")
     joblib.dump(melhor, a.saida / "modelo.joblib", compress=3)
+    relatorio_atributos(melhor, a.saida / "atributos_mais_influentes.json")
 
     print("Calibrando os escores em amostra separada…", flush=True)
     cal = partes["calibracao"]
@@ -129,6 +140,7 @@ def main(argv=None):
     limiares = [.5, .5]
     salvar_json(a.saida / "politica_decisao.json", {
         "preparacao": VERSAO_PREPARACAO, "rotulos": rotulos, "limiares": limiares,
+        "entrada_pipeline": "bruta", "limpeza": None if a.sem_limpeza else VERSAO_LIMPEZA,
         "calibracao": "Regressão logística sobre a margem do SVM; somente partição de calibração",
         "decisao": "binaria_sem_abstencao", "filtro_dominio": False,
         "regra_opiniao": "Frases pessoais de beleza inteiras: fake por convenção explícita, sem escore.",
@@ -142,7 +154,7 @@ def main(argv=None):
     metricas["por_classe_sem_abstencao"] = classification_report(teste.label, probs.argmax(axis=1),
         labels=[0, 1], target_names=rotulos, output_dict=True, zero_division=0)
     salvar_json(a.saida / "metricas_teste.json", metricas)
-    hosts = teste.url.map(lambda u: urlsplit(u).hostname or "sem_url").to_numpy()
+    hosts = teste.get("url", pd.Series("", index=teste.index)).map(lambda u: urlsplit(u).hostname or "sem_url").to_numpy()
     fontes = {}
     for host in sorted(set(hosts)):
         pos = hosts == host

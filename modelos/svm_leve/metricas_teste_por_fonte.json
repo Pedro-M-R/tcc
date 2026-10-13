@@ -3,7 +3,7 @@
     "total": 16,
     "acuracia_sem_abstencao": 0.375,
     "f1_macro_sem_abstencao": 0.2727272727272727,
-    "brier_multiclasse": 0.8233008865673396,
+    "brier_multiclasse": 0.7843805539888734,
     "aceitos": 16,
     "abstencoes": 0,
     "cobertura": 1.0,
@@ -28,7 +28,7 @@
     "total": 2,
     "acuracia_sem_abstencao": 0.0,
     "f1_macro_sem_abstencao": 0.0,
-    "brier_multiclasse": 1.4006658061958612,
+    "brier_multiclasse": 1.2413278702345467,
     "aceitos": 2,
     "abstencoes": 0,
     "cobertura": 1.0,
@@ -53,7 +53,7 @@
     "total": 1,
     "acuracia_sem_abstencao": 1.0,
     "f1_macro_sem_abstencao": 1.0,
-    "brier_multiclasse": 0.21393046889782202,
+    "brier_multiclasse": 0.3378872931761238,
     "aceitos": 1,
     "abstencoes": 0,
     "cobertura": 1.0,
@@ -76,13 +76,13 @@
   },
   "economia.estadao.com.br": {
     "total": 1,
-    "acuracia_sem_abstencao": 0.0,
-    "f1_macro_sem_abstencao": 0.0,
-    "brier_multiclasse": 0.7344363035215203,
+    "acuracia_sem_abstencao": 1.0,
+    "f1_macro_sem_abstencao": 1.0,
+    "brier_multiclasse": 0.4475023851400705,
     "aceitos": 1,
     "abstencoes": 0,
     "cobertura": 1.0,
-    "acuracia_aceitos": 0.0,
+    "acuracia_aceitos": 1.0,
     "ordem_classes": [
       "fake",
       "true"
@@ -93,8 +93,8 @@
         0
       ],
       [
-        1,
-        0
+        0,
+        1
       ]
     ],
     "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
@@ -103,7 +103,7 @@
     "total": 16,
     "acuracia_sem_abstencao": 1.0,
     "f1_macro_sem_abstencao": 1.0,
-    "brier_multiclasse": 0.03647856142204557,
+    "brier_multiclasse": 0.026340699257085057,
     "aceitos": 16,
     "abstencoes": 0,
     "cobertura": 1.0,
@@ -128,7 +128,7 @@
     "total": 2,
     "acuracia_sem_abstencao": 1.0,
     "f1_macro_sem_abstencao": 1.0,
-    "brier_multiclasse": 0.003186212654590731,
+    "brier_multiclasse": 0.0046428777956722175,
     "aceitos": 2,
     "abstencoes": 0,
     "cobertura": 1.0,
@@ -151,13 +151,13 @@
   },
   "g1.globo.com": {
     "total": 384,
-    "acuracia_sem_abstencao": 0.9791666666666666,
-    "f1_macro_sem_abstencao": 0.9746559746559746,
-    "brier_multiclasse": 0.03614359115496677,
+    "acuracia_sem_abstencao": 0.9765625,
+    "f1_macro_sem_abstencao": 0.9715637470687457,
+    "brier_multiclasse": 0.04096832231393822,
     "aceitos": 384,
     "abstencoes": 0,
     "cobertura": 1.0,
-    "acuracia_aceitos": 0.9791666666666666,
+    "acuracia_aceitos": 0.9765625,
     "ordem_classes": [
       "fake",
       "true"
@@ -168,29 +168,29 @@
         5
       ],
       [
-        3,
-        269
+        4,
+        268
       ]
     ],
     "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
   },
   "noticias.uol.com.br": {
     "total": 146,
-    "acuracia_sem_abstencao": 0.8904109589041096,
-    "f1_macro_sem_abstencao": 0.47101449275362317,
-    "brier_multiclasse": 0.1740905854851036,
+    "acuracia_sem_abstencao": 0.8835616438356164,
+    "f1_macro_sem_abstencao": 0.4690909090909091,
+    "brier_multiclasse": 0.16169033283903078,
     "aceitos": 146,
     "abstencoes": 0,
     "cobertura": 1.0,
-    "acuracia_aceitos": 0.8904109589041096,
+    "acuracia_aceitos": 0.8835616438356164,
     "ordem_classes": [
       "fake",
       "true"
     ],
     "matriz_confusao_sem_abstencao": [
       [
-        130,
-        16
+        129,
+        17
       ],
       [
         0,
@@ -203,7 +203,7 @@
     "total": 7,
     "acuracia_sem_abstencao": 1.0,
     "f1_macro_sem_abstencao": 1.0,
-    "brier_multiclasse": 0.0538850963401726,
+    "brier_multiclasse": 0.0283138155945741,
     "aceitos": 7,
     "abstencoes": 0,
     "cobertura": 1.0,
@@ -228,7 +228,7 @@
     "total": 82,
     "acuracia_sem_abstencao": 0.9512195121951219,
     "f1_macro_sem_abstencao": 0.4875,
-    "brier_multiclasse": 0.06086874774130455,
+    "brier_multiclasse": 0.07625265200624112,
     "aceitos": 82,
     "abstencoes": 0,
     "cobertura": 1.0,
@@ -251,21 +251,21 @@
   },
   "www.boatos.org": {
     "total": 359,
-    "acuracia_sem_abstencao": 0.9749303621169917,
-    "f1_macro_sem_abstencao": 0.9747769268601139,
-    "brier_multiclasse": 0.04160840811094216,
+    "acuracia_sem_abstencao": 0.9665738161559888,
+    "f1_macro_sem_abstencao": 0.9664109281437125,
+    "brier_multiclasse": 0.05945814395326511,
     "aceitos": 359,
     "abstencoes": 0,
     "cobertura": 1.0,
-    "acuracia_aceitos": 0.9749303621169917,
+    "acuracia_aceitos": 0.9665738161559888,
     "ordem_classes": [
       "fake",
       "true"
     ],
     "matriz_confusao_sem_abstencao": [
       [
-        189,
-        0
+        186,
+        3
       ],
       [
         9,
@@ -276,13 +276,13 @@
   },
   "www.e-farsas.com": {
     "total": 10,
-    "acuracia_sem_abstencao": 1.0,
-    "f1_macro_sem_abstencao": 1.0,
-    "brier_multiclasse": 0.03485846031256051,
+    "acuracia_sem_abstencao": 0.9,
+    "f1_macro_sem_abstencao": 0.47368421052631576,
+    "brier_multiclasse": 0.11380610883782849,
     "aceitos": 10,
     "abstencoes": 0,
     "cobertura": 1.0,
-    "acuracia_aceitos": 1.0,
+    "acuracia_aceitos": 0.9,
     "ordem_classes": [
       "fake",
       "true"
@@ -293,8 +293,8 @@
         0
       ],
       [
-        0,
-        10
+        1,
+        9
       ]
     ],
     "nota": "Desempenho desta amostra; não garante factualidade, domínio novo ou desempenho futuro."
@@ -303,7 +303,7 @@
     "total": 2,
     "acuracia_sem_abstencao": 0.0,
     "f1_macro_sem_abstencao": 0.0,
-    "brier_multiclasse": 1.1397756373137615,
+    "brier_multiclasse": 1.1403960881538182,
     "aceitos": 2,
     "abstencoes": 0,
     "cobertura": 1.0,
@@ -328,7 +328,7 @@
     "total": 3,
     "acuracia_sem_abstencao": 1.0,
     "f1_macro_sem_abstencao": 1.0,
-    "brier_multiclasse": 0.011779803783643829,
+    "brier_multiclasse": 0.012753501573799167,
     "aceitos": 3,
     "abstencoes": 0,
     "cobertura": 1.0,
@@ -353,7 +353,7 @@
     "total": 11,
     "acuracia_sem_abstencao": 0.5454545454545454,
     "f1_macro_sem_abstencao": 0.35294117647058826,
-    "brier_multiclasse": 0.5851289206012827,
+    "brier_multiclasse": 0.6091982222859644,
     "aceitos": 11,
     "abstencoes": 0,
     "cobertura": 1.0,

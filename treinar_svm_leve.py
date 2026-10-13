@@ -52,7 +52,7 @@ def vetorizador(config):
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--csv", nargs="+", default=["resultados/bases/base_atualizada_2026-10-06.csv"])
+    p.add_argument("--csv", nargs="+", default=["resultados/bases/base_sem_checagem_2026-10-13.csv"])
     p.add_argument("--saida", type=Path, default=Path("modelos/svm_leve"))
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--perfil", choices=("leve", "completo"), default="completo")

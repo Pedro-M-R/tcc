@@ -14,7 +14,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
 
 from treinar_svm_leve import vetorizador
-from treinamento_local.limpeza import limpar_texto
+from treinamento_local.limpeza import limpar_texto, remover_secao_checagem
 from treinamento_local.vazamento_svm import carregar_svm, dividir_svm, relatorio_atributos
 
 
@@ -23,6 +23,24 @@ CONFIG = {"nome": "teste", "palavras": 300, "ordem_palavras": 2,
 
 
 class TestLimpezaSVM(unittest.TestCase):
+    def test_remove_secao_inteira_sem_apagar_mencao_comum(self):
+        for marcador in ("\nChecagem:\n", "\n## CHECAGEM\n", "\n**Checagem:** "):
+            with self.subTest(marcador=marcador):
+                texto = "A escola abriu ontem." + marcador + "Conclusão editorial secreta."
+                self.assertEqual(remover_secao_checagem(texto), "A escola abriu ontem.")
+        texto = "O motorista passou pela checagem de documentos e iniciou a viagem."
+        self.assertEqual(remover_secao_checagem(texto), texto)
+
+    def test_formato_achatado_e_mesma_limpeza_nos_dois_analisadores(self):
+        antes = "Boato escola fechou análise mensagem circula escola fechou"
+        completo = antes + " checagem escola continua aberta conclusão informação inventada"
+        self.assertEqual(remover_secao_checagem(completo), antes)
+        self.assertEqual(remover_secao_checagem(antes), antes)
+        self.assertEqual(remover_secao_checagem("relato checagem parte checagem explicação"), "relato")
+        for _, vetor in vetorizador(CONFIG).transformer_list:
+            analisar = vetor.build_analyzer()
+            self.assertEqual(analisar(completo), analisar(antes))
+
     def test_preserva_conteudo_e_remove_pistas_e_linhas_editoriais(self):
         texto = ("É #FALSO: montagem verificada pela Agência Lupa e Aos Fatos.\n"
                  "O governo não confirmou o golpe em 2026.\nPor: Maria Silva\n"

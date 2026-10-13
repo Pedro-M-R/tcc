@@ -9,7 +9,7 @@
     0.5
   ],
   "entrada_pipeline": "bruta",
-  "limpeza": "svm_limpeza_v2",
+  "limpeza": "svm_limpeza_v3_sem_secao_checagem",
   "calibracao": "Regressão logística sobre a margem do SVM; somente partição de calibração",
   "decisao": "binaria_sem_abstencao",
   "filtro_dominio": false,

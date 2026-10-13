@@ -15,7 +15,7 @@
     },
     "C": 1.0,
     "class_weight": "balanced",
-    "f1_macro_validacao": 0.9383528751172876,
+    "f1_macro_validacao": 0.9345333037955988,
     "convergiu": true,
     "dimensoes": 100000
   },
@@ -36,7 +36,7 @@
       },
       "C": 0.25,
       "class_weight": "balanced",
-      "f1_macro_validacao": 0.9344825037874589,
+      "f1_macro_validacao": 0.9326401446654611,
       "convergiu": true,
       "dimensoes": 100000
     },
@@ -56,7 +56,7 @@
       },
       "C": 1.0,
       "class_weight": "balanced",
-      "f1_macro_validacao": 0.9383528751172876,
+      "f1_macro_validacao": 0.9345333037955988,
       "convergiu": true,
       "dimensoes": 100000
     },
@@ -76,7 +76,7 @@
       },
       "C": 4.0,
       "class_weight": "balanced",
-      "f1_macro_validacao": 0.9364264024647029,
+      "f1_macro_validacao": 0.9296744607057585,
       "convergiu": true,
       "dimensoes": 100000
     }

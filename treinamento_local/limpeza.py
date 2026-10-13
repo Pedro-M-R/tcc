@@ -5,7 +5,7 @@ import unicodedata
 
 from preparacao_noticias import preparar_noticia, PISTAS
 
-VERSAO_LIMPEZA = "svm_limpeza_v2"
+VERSAO_LIMPEZA = "svm_limpeza_v3_sem_secao_checagem"
 TERMOS_ROTULO = (
     r"fals\w*", r"fake\w*", r"farsa\w*", r"boato\w*", r"enganos\w*",
     r"desinforma\w*", r"hoax\w*", r"mentira\w*", r"montage(?:m|ns)",
@@ -25,6 +25,35 @@ _EDITORIAL = re.compile(
 )
 
 
+def remover_secao_checagem(texto):
+    """Corta a seção editorial e tudo que a segue, preservando o texto anterior.
+
+    Reconhece cabeçalhos e o formato achatado Boato / Análise / Checagem
+    da base tratada. Uma menção comum a checagem não é um cabeçalho.
+    A regra independe do rótulo e também é aplicada na inferência.
+    """
+    texto = str(texto)
+    flags = re.IGNORECASE | re.MULTILINE
+    cortes = []
+    cabecalho = re.search(
+        r"^[ \t]*(?:#{1,6}[ \t]+)?(?:\*\*)?checagem(?:\*\*)?"
+        r"[ \t]*(?::|[–—-]|\r?$)", texto, flags)
+    if cabecalho:
+        cortes.append(cabecalho.start())
+    # No CSV original, pontuação e quebras de linha já foram removidas.
+    estrutura = re.search(r"^[ \t]*boatos?\b.*?\ban[aá]lise\b", texto, flags | re.DOTALL)
+    if estrutura:
+        marcador = re.search(r"\bchecagem\b", texto[estrutura.end():], re.IGNORECASE)
+        if marcador:
+            cortes.append(estrutura.end() + marcador.start())
+    # Formato anterior do mesmo corpus: "checagem parte checagem ...".
+    parte = re.search(
+        r"\b(?:checagem\s+)?parte\s+(?:de\s+)?checagem\b", texto, re.IGNORECASE)
+    if parte:
+        cortes.append(parte.start())
+    return texto[:min(cortes)].rstrip() if cortes else texto
+
+
 def limpar_texto(texto):
     """Normaliza e remove pistas ANTES dos analisadores de palavras e caracteres.
 
@@ -32,7 +61,8 @@ def limpar_texto(texto):
     podem ser o próprio acontecimento; ampliar regras exige revisão do treino.
     A remoção não garante ausência de viés ou compreensão factual.
     """
-    texto = unicodedata.normalize("NFKD", str(texto).lower())
+    texto = remover_secao_checagem(texto)
+    texto = unicodedata.normalize("NFKD", texto.lower())
     texto = "".join(c for c in texto if not unicodedata.combining(c))
     # Antes de remover nomes de fontes: não pode sobrar um fragmento 'https://'.
     texto = re.sub(r"(?:https?://|www\.)\S+|\b[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}\b", " ", texto)

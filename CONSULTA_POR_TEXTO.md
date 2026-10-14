@@ -1,0 +1,93 @@
+# Consulta de checagens a partir do texto
+
+Revisão de 14/10/2026.
+
+No formulário **Colar título e texto**, cole a alegação ou mensagem recebida
+e clique em **Consultar checagens pelo texto**. Não é necessário informar URL.
+O botão **Analisar notícia com SVM** mantém a análise estatística separada.
+
+A consulta utiliza a busca pública do **Boatos.org**, sem chave de API. Envia
+até seis termos extraídos do título ou do início do texto. Não envia o corpo
+inteiro. Examina até cinco páginas, com orçamento de aproximadamente 20 segundos
+(a resolução DNS depende do sistema operacional).
+
+O sistema só apresenta uma conclusão automaticamente se encontrar:
+
+- Uma alegação completa correspondente no título ou primeiro parágrafo/linha;
+  ou uma mensagem completa citada em um bloco de citação da fonte.
+- A alegação e um selo de conclusão explícito, sem conflito, no artigo original.
+
+A comparação ignora caixa, acentos e pontuação. Mantém palavras, negações,
+números e endereços citados. Não interpreta paráfrases. Similaridade de assunto
+ou os mesmos nomes nunca bastam para atribuir verdadeiro/falso.
+
+O resultado identifica a alegação examinada e oferece o link da checagem. Não
+classifica toda a reportagem como falsa por ela descrever um boato. Matérias
+relacionadas sem correspondência são sugestões de leitura. Busca vazia, falha
+de rede ou conclusões conflitantes deixam a consulta inconclusiva; não disparam
+automaticamente um veredito do SVM.
+
+## Relação com o treinamento
+
+Este recurso consulta uma fonte externa; ele não é uma melhora de acurácia do
+SVM. Os resultados da consulta não devem ser contados como acertos do modelo
+no TCC. O SVM continua podendo errar em notícias novas.
+
+O treinador `treinar_svm_leve.py` desta pasta passou a gerar variantes após a
+separação dos grupos: texto completo (60%), título (20%) e primeiras 40 palavras
+do corpo (20%). Variantes iguais após a limpeza são unidas e cada notícia mantém
+peso total 1. A validação e a calibração também incluem as variantes. A decisão
+continua em 0,5; não foi ajustada para acertar uma pessoa ou um exemplo.
+
+`--sem-variantes` controla somente a ampliação do treino; validação e calibração
+continuam incluindo entradas curtas. `metricas_teste_por_entrada.json` separa os
+resultados por formato. Os recortes herdam o rótulo documental e precisam de
+revisão de contexto. O teste interno já foi reutilizado; as métricas são
+exploratórias e não estimam, sozinhas, desempenho em notícias novas.
+
+O caso informado pelo usuário fica fora do treino, em um diagnóstico local.
+Novos experimentos são gravados em outra pasta; executar o treinador não
+substitui automaticamente o modelo ativo nem publica o site.
+
+## Resultado do experimento concluído
+
+O treinamento `experimentos/svm_variantes_20261014` terminou em 528 segundos.
+A comparação nos mesmos 1.042 documentos de teste ficou assim:
+
+| Entrada | F1 macro do modelo ativo | F1 macro com variantes |
+|---|---:|---:|
+| Notícia completa | 94,01% | 92,20% |
+| Somente título | 45,97% | 74,95% |
+| Primeiras 40 palavras | 83,40% | 89,70% |
+
+Em notícias completas, ambos reconheceram 449 das 488 falsas. Os erros que
+classificam verdadeiras como falsas subiram de 23 para 42, entre 554 verdadeiras.
+O modelo com variantes também continuou classificando a alegação curta e as
+duas mensagens do exemplo como `true`. Por isso, **o modelo ativo foi mantido**.
+O experimento continua disponível para estudo; não é a solução desse caso.
+
+A consulta real por texto reconheceu cinco entradas: alegação curta, texto
+longo, título com corpo separado e as duas mensagens. Todas retornaram `fake`
+como conclusão publicada pelo Boatos.org, com o link da checagem. As interfaces
+da raiz e da pasta de publicação também passaram na verificação ao vivo.
+
+Os registros locais ficam em `resultados/revisao_textos_20261014/comparacao.json`
+e `consulta_ao_vivo.json`. Esses resultados são diagnósticos, não uma garantia
+para paráfrases, outras alegações ou indisponibilidade da fonte.
+
+## Validação
+
+Na pasta `.publicacao-svm`, com o ambiente Python do projeto:
+
+```powershell
+..\.venv-svm\Scripts\python.exe -m unittest test_consulta_fontes test_variantes_svm test_checagem test_links -v
+```
+
+Os testes isolam a rede e cobrem conclusões falsas/verdadeiras, mensagens
+citadas, mudanças de negação/data/sujeito, ausência de selo, fonte indisponível,
+domínio imitado e conflitos. Testes de interface verificam que a consulta não
+chama o SVM nem exibe percentuais inventados.
+
+A consulta depende da disponibilidade e do HTML da fonte. Notícias para as
+quais não exista checagem nesse site e textos reformulados podem não ser
+reconhecidos. Não existe promessa de classificar toda notícia falsa.

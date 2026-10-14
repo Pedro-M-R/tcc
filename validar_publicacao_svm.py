@@ -44,7 +44,7 @@ def main():
         print(json.dumps(registro, ensure_ascii=True), flush=True)
         assert not erros, registro
         assert inconclusivo == nome.startswith('triagem'), registro
-        assert any('2026.10.09-triagem1' in s for s in rodape), registro
+        assert any('2026.10.14-consulta-texto' in s for s in rodape), registro
         if nome.startswith('triagem'):
             assert not titulos and not metricas, registro
             assert any('Nenhum escore de veracidade foi atribuído' in s for s in mensagens), registro
@@ -57,7 +57,7 @@ def main():
             assert not metricas, registro
         else:
             assert titulos and len(metricas) == 2, registro
-    saida = Path('resultados/revisao_casos_reais/publicacao_triagem1.json')
+    saida = Path('resultados/revisao_textos_20261014/publicacao_consulta_texto.json')
     saida.parent.mkdir(parents=True, exist_ok=True)
     saida.write_text(json.dumps(registros, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'Publicacao validada: {len(casos)} casos, incluindo os dois links nos dois formularios.')

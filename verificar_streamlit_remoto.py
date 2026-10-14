@@ -24,7 +24,31 @@ def receber(ws):
     raise TimeoutError('O Streamlit não concluiu a execução.')
 
 
-def verificar(url, titulo=None, texto=None, link=None):
+def campos_formulario(elementos, formulario, consultar=False):
+    """Escolhe a ação pelo rótulo, sem depender da ordem dos botões."""
+    rotulos = ({'Consultar checagens pelo texto'} if consultar else
+               {'Analisar notícia', 'Analisar notícia com SVM'})
+    if formulario == 'link' and not consultar:
+        rotulos = {'Ler link e analisar'}
+    campos = {}
+    for delta in elementos:
+        e = delta.get('newElement', {})
+        for tipo in ('textInput', 'textArea', 'button'):
+            campo = e.get(tipo)
+            if not campo or campo.get('formId') != formulario:
+                continue
+            if tipo == 'button' and campo.get('label') not in rotulos:
+                continue
+            campos[tipo] = campo['id']
+    esperados = {'textInput', 'button'} if formulario == 'link' else {'textInput', 'textArea', 'button'}
+    if set(campos) != esperados:
+        raise ValueError(f'O formulário {formulario} ou a ação solicitada não foi encontrado no app remoto.')
+    return campos
+
+
+def verificar(url, titulo=None, texto=None, link=None, consultar=False):
+    if consultar and link is not None:
+        raise ValueError('A consulta por texto não recebe link.')
     wsurl = url.rstrip('/').replace('https://', 'wss://').replace('http://', 'ws://') + '/_stcore/stream'
     sessao = requests.Session()
     sessao.get(url, timeout=25).raise_for_status()
@@ -51,16 +75,8 @@ def verificar(url, titulo=None, texto=None, link=None):
             ws.send(pedido.SerializeToString())
             elementos = receber(ws)
         if titulo is not None or texto is not None or link is not None:
-            campos = {}
             formulario = 'link' if link is not None else 'noticia'
-            for delta in elementos:
-                e = delta.get('newElement', {})
-                for tipo in ('textInput', 'textArea', 'button'):
-                    if tipo in e and e[tipo].get('formId') == formulario:
-                        campos[tipo] = e[tipo]['id']
-            esperados = {'textInput', 'button'} if link is not None else {'textInput', 'textArea', 'button'}
-            if set(campos) != esperados:
-                raise ValueError(f'O formulário {formulario} não foi encontrado no app remoto.')
+            campos = campos_formulario(elementos, formulario, consultar)
             pedido = BackMsg()
             pedido.rerun_script.query_string = ''
             if radio_id is not None:

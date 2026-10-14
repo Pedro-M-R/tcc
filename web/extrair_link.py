@@ -69,8 +69,8 @@ class ConexaoSegura(http.client.HTTPSConnection):
             raise
 
 
-def baixar_html(url):
-    limite_tempo = time.monotonic() + 25
+def baixar_html(url, tempo_limite=25):
+    limite_tempo = time.monotonic() + min(25, tempo_limite)
     for _ in range(5):
         url, esquema, host, host_header, porta, ip, destino = validar_destino(url)
         restante = limite_tempo - time.monotonic()

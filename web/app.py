@@ -9,6 +9,7 @@ import streamlit as st
 from inferencia import Classificador, modelos_do_site
 from extrair_link import ErroLink, extrair_noticia, link_colado
 from checagem import texto_parece_checagem
+from consulta_fontes import consultar_fontes
 from apresentacao import formatar_probabilidade
 from triagem_noticias import INDICIOS, avaliar_entrada
 from svm_leve import opiniao_pessoal
@@ -37,6 +38,25 @@ def mostrar_checagem(checagem):
                "É a conclusão publicada pelo Boatos.org, não uma previsão do SVM.")
     st.caption("A alegação examinada e o artigo que a explica são conteúdos diferentes. "
                "Esta análise se refere à alegação exibida acima.")
+
+
+def mostrar_consulta(resultado):
+    if resultado['status'] == 'encontrada':
+        st.caption('Checagem encontrada a partir do texto informado.')
+        mostrar_checagem(resultado['checagem'])
+        return
+    st.warning('Consulta às fontes inconclusiva')
+    mensagens = {
+        'relacionadas': 'Encontramos matérias relacionadas, mas não confirmamos uma correspondência exata com a alegação. Confira os links abaixo.',
+        'nao_encontrada': 'Não encontramos uma checagem correspondente no Boatos.org. Isso não significa que a notícia seja verdadeira.',
+        'indisponivel': 'A fonte não respondeu à consulta. Tente novamente mais tarde.',
+        'insuficiente': 'Informe a alegação com mais detalhes para buscar uma checagem.',
+        'conflitante': 'Encontramos conclusões conflitantes. Consulte as fontes antes de concluir.',
+    }
+    st.write(mensagens[resultado['status']])
+    for fonte in resultado.get('fontes', []):
+        st.link_button(fonte['titulo'] or 'Consultar matéria', fonte['url'])
+    st.caption('Esta consulta não atribuiu verdadeiro ou falso ao texto. Você também pode solicitar a análise estatística pelo botão Analisar notícia com SVM.')
 
 
 def mostrar_resultado(resultado, nome="TF-IDF + SVM"):
@@ -120,6 +140,7 @@ coluna_entrada, coluna_resultado = st.columns([1.15, 1], gap="large")
 titulo, texto = "", ""
 noticia_extraida = None
 erro_link = None
+consultar = False
 
 with coluna_entrada, st.container(border=True, key="painel_entrada"):
     st.markdown('<div class="painel-cabecalho"><span class="numero">01</span><h3>Qual é a notícia?</h3></div>'
@@ -140,9 +161,13 @@ with coluna_entrada, st.container(border=True, key="painel_entrada"):
             titulo = st.text_input("Título da notícia (opcional)", placeholder="Qual é a manchete?", max_chars=500)
             texto = st.text_area("Texto da notícia", placeholder="Cole o conteúdo que você quer analisar…",
                                  height=220, max_chars=30000)
-            st.caption("Envie o corpo da notícia com pelo menos 40 palavras e contexto do acontecimento. "
-                       "Frases soltas e títulos isolados podem resultar em análise inconclusiva.")
-            enviar = st.form_submit_button("Analisar notícia", type="primary", use_container_width=True)
+            st.caption("Para consultar fontes, cole a alegação ou a mensagem recebida. "
+                       "Para analisar com o SVM, envie o corpo da notícia com pelo menos 40 palavras e contexto.")
+            enviar = st.form_submit_button("Analisar notícia com SVM", use_container_width=True)
+            consultar = st.form_submit_button("Consultar checagens pelo texto", type="primary", use_container_width=True)
+            st.caption("Na consulta, termos do título ou início do texto são enviados à busca pública do Boatos.org. "
+                       "A conclusão da fonte será mostrada se a alegação ou mensagem citada for reconhecida. "
+                       "Não é necessário informar um link.")
         if enviar:
             try:
                 url_colada = link_colado(titulo, texto)
@@ -184,6 +209,10 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
                 '<p class="painel-subtitulo">Uma estimativa para ajudar na sua leitura crítica.</p>', unsafe_allow_html=True)
     if erro_link:
         st.warning(erro_link)
+    elif consultar:
+        with st.spinner('Buscando uma checagem para o texto…'):
+            consulta = consultar_fontes(titulo, texto)
+        mostrar_consulta(consulta)
     elif enviar:
         checagem = noticia_extraida.get("checagem") if noticia_extraida else None
         if not (titulo.strip() or texto.strip()):
@@ -233,4 +262,4 @@ with st.container(key="aviso_modelo"):
             "As previsões do SVM analisam padrões de texto e não verificam fatos. "
             "Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.")
 st.markdown('<div class="rodape"><span>Notícia em análise · Projeto acadêmico</span>'
-            '<span>TF-IDF + SVM · Revisão 2026.10.09-triagem1</span></div>', unsafe_allow_html=True)
+            '<span>TF-IDF + SVM · Revisão 2026.10.14-consulta-texto</span></div>', unsafe_allow_html=True)

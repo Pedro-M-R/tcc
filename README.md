@@ -1,5 +1,17 @@
 # Notícia em análise — TF-IDF + SVM binário
 
+Revisão atual: **2026.10.14-consulta-texto**. Para buscar uma checagem sem URL,
+use **Colar título e texto → Consultar checagens pelo texto**. A fonte e sua
+conclusão aparecem separadas da previsão do SVM. Leia o
+[resultado da revisão](RESULTADO_REVISAO_20261014.md) e o
+[guia da consulta](CONSULTA_POR_TEXTO.md).
+
+O modelo ativo de 13/10 foi mantido após a comparação com o experimento de
+variantes. Seus resultados internos são 94,05% de acurácia e 94,01% de F1 macro.
+Os números e a configuração da revisão 08/10 abaixo são históricos.
+A interface atual trata entradas sem contexto como inconclusivas; a consulta
+às fontes permite buscar também alegações curtas.
+
 Limpeza no Pipeline, ablação e avaliação por fontes: [guia de limpeza do SVM](LIMPEZA_SVM.md).
 
 A revisão **2026.10.08-svm3** classifica entradas preenchidas em `fake` ou

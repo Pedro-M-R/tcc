@@ -24,6 +24,7 @@ from preparacao_noticias import VERSAO_PREPARACAO
 from treinamento_local.vazamento_svm import carregar_svm, dividir_svm, relatorio_atributos
 from treinamento_local.limpeza import limpar_texto, VERSAO_LIMPEZA
 from treinamento_local.calibracao import avaliar
+from treinamento_local.variantes_svm import criar_variantes, avaliar_entradas
 
 
 CONFIGURACOES = [
@@ -59,6 +60,7 @@ def main(argv=None):
     p.add_argument("--sem-limpeza", action="store_true", help="Controle de ablação com texto original")
     p.add_argument("--separacao", choices=("grupo", "fonte"), default="grupo")
     p.add_argument("--validar-dados", action="store_true", help="Audita fontes e partições sem treinar")
+    p.add_argument("--sem-variantes", action="store_true", help="Controle: treina somente notícias completas")
     a = p.parse_args(argv)
     if a.saida.exists() and any(a.saida.iterdir()):
         p.error("Saída ocupada; escolha uma nova pasta para preservar o modelo anterior.")
@@ -84,6 +86,10 @@ def main(argv=None):
     # Calibração e teste continuam isolados, com os mesmos grupos de antes.
     treino = pd.concat([partes["treino"], partes["selecao"]])
     validacao = partes["validacao"]
+    textos_treino, y_treino, pesos_treino = criar_variantes(
+        treino, curtos=not a.sem_variantes, limpeza=not a.sem_limpeza)
+    # Mesmo critério de validação para treino com e sem variantes.
+    textos_validacao, y_validacao, pesos_validacao = criar_variantes(validacao, limpeza=not a.sem_limpeza)
     melhor_f1, escolha, candidatos = -1.0, None, []
     configs = CONFIGURACOES if a.perfil == "completo" else CONFIGURACOES[:1]
     configs = [{**c, "limpeza": not a.sem_limpeza} for c in configs]
@@ -92,16 +98,17 @@ def main(argv=None):
     for config in configs:
         print(f"TF-IDF: {config['nome']}", flush=True)
         vetor = vetorizador(config)
-        x = vetor.fit_transform(treino.entrada_a)
-        xv = vetor.transform(validacao.entrada_a)
+        x = vetor.fit_transform(textos_treino)
+        xv = vetor.transform(textos_validacao)
         for peso in pesos:
             for c in valores_c:
                 svm = LinearSVC(C=c, class_weight=peso, dual="auto", max_iter=20000, random_state=a.seed)
                 with warnings.catch_warnings(record=True) as avisos:
                     warnings.simplefilter("always", ConvergenceWarning)
-                    svm.fit(x, treino.label)
+                    svm.fit(x, y_treino, sample_weight=pesos_treino)
                 convergiu = not any(issubclass(w.category, ConvergenceWarning) for w in avisos)
-                f1 = float(f1_score(validacao.label, svm.predict(xv), average="macro"))
+                f1 = float(f1_score(y_validacao, svm.predict(xv), average="macro",
+                                    sample_weight=pesos_validacao, zero_division=0))
                 candidato = {"atributos": config["nome"], "config": config, "C": c,
                              "class_weight": peso, "f1_macro_validacao": f1,
                              "convergiu": convergiu, "dimensoes": x.shape[1]}
@@ -121,7 +128,9 @@ def main(argv=None):
                                          dual="auto", max_iter=20000, random_state=a.seed))])
     with warnings.catch_warnings(record=True) as avisos:
         warnings.simplefilter("always", ConvergenceWarning)
-        melhor.fit(final.entrada_a, final.label)
+        textos_final, y_final, pesos_final = criar_variantes(
+            final, curtos=not a.sem_variantes, limpeza=not a.sem_limpeza)
+        melhor.fit(textos_final, y_final, svm__sample_weight=pesos_final)
     if any(issubclass(w.category, ConvergenceWarning) for w in avisos):
         raise RuntimeError("O ajuste final não convergiu; o modelo não será marcado como concluído.")
     joblib.dump(melhor, a.saida / "modelo.joblib", compress=3)
@@ -130,7 +139,9 @@ def main(argv=None):
     print("Calibrando os escores em amostra separada…", flush=True)
     cal = partes["calibracao"]
     calibrador = LogisticRegression(C=1.0, max_iter=2000, random_state=a.seed)
-    calibrador.fit(melhor.decision_function(cal.entrada_a).reshape(-1, 1), cal.label)
+    textos_cal, y_cal, pesos_cal = criar_variantes(cal, limpeza=not a.sem_limpeza)
+    calibrador.fit(melhor.decision_function(textos_cal).reshape(-1, 1), y_cal,
+                   sample_weight=pesos_cal)
     joblib.dump(calibrador, a.saida / "calibrador.joblib", compress=3)
 
     def prever(parte):
@@ -145,9 +156,17 @@ def main(argv=None):
         "decisao": "binaria_sem_abstencao", "filtro_dominio": False,
         "regra_opiniao": "Frases pessoais de beleza inteiras: fake por convenção explícita, sem escore.",
         "nota": "Escores calibrados na amostra; não são probabilidades de verdade factual."})
+    salvar_json(a.saida / "protocolo_variantes.json", {
+        "treino_com_variantes": not a.sem_variantes,
+        "pesos_por_noticia": {"completo": .6, "titulo": .2, "inicio_40": .2},
+        "validacao_e_calibracao_com_variantes": True,
+        "geradas_apos_separacao": True,
+        "criterio": "F1 macro ponderado na validação; decisão calibrada a 0,5",
+        "limite": "Recortes herdam rótulos; teste interno reutilizado, avaliação exploratória."})
     # O teste só é avaliado com a configuração e a política congeladas.
     print("Avaliando o teste reservado…", flush=True)
     teste = partes["teste"]
+    salvar_json(a.saida / "metricas_teste_por_entrada.json", avaliar_entradas(melhor, calibrador, teste))
     probs, elegivel = prever(teste), np.ones(len(teste), dtype=bool)
     metricas = avaliar(probs, teste.label, limiares, elegivel, rotulos)
     metricas["escopo"] = "Classificador estatístico nas notícias; regra de opinião avaliada em testes separados."

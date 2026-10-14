@@ -1,8 +1,9 @@
 # Notícia em análise — TF-IDF + SVM binário
 
-Revisão atual: **2026.10.14-consulta-texto**. Para buscar uma checagem sem URL,
+Revisão atual: **2026.10.14-consulta-unica**. Para buscar uma checagem sem URL,
 use **Colar título e texto → Consultar checagens pelo texto**. A fonte e sua
-conclusão aparecem separadas da previsão do SVM. Leia o
+conclusão aparecem no resultado. Esse é o único botão do formulário de texto;
+o SVM permanece na leitura de links. Leia o
 [resultado da revisão](RESULTADO_REVISAO_20261014.md) e o
 [guia da consulta](CONSULTA_POR_TEXTO.md).
 

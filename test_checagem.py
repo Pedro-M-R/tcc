@@ -52,8 +52,8 @@ class TestChecagem(unittest.TestCase):
         modelo.analisar.return_value = {"rotulo": "true", "truncado": True,
                                        "probabilidades": {"fake": .001, "true": .999}}
         app = AppTest.from_file(str(Path(__file__).resolve().parent / "web/app.py"), default_timeout=30).run()
-        app.selectbox[0].set_value("TF-IDF + SVM").run()
         app.radio[0].set_value("Usar um link").run()
+        app.selectbox[0].set_value("TF-IDF + SVM").run()
         with patch("extrair_link.extrair_noticia", return_value=noticia):
             with patch("inferencia.Classificador", return_value=modelo) as carregar:
                 app.text_input[0].set_value(URL)
@@ -99,11 +99,14 @@ class TestChecagem(unittest.TestCase):
     def test_texto_colado_de_checagem_nao_autentica_conclusao(self):
         from streamlit.testing.v1 import AppTest
         app = AppTest.from_file(str(Path(__file__).resolve().parent / "web/app.py"), default_timeout=30).run()
-        with patch("inferencia.Classificador") as carregar:
+        with patch("inferencia.Classificador") as carregar, patch(
+            'consulta_fontes.consultar_fontes', return_value={'status': 'nao_encontrada', 'fontes': []}
+        ) as consultar:
             app.text_area[0].set_value("Boato - O parque vai fechar.\nChecagem\nRelato de investigação.\nConclusão\nFake news")
             app.button[0].click().run()
         self.assertFalse(app.exception)
-        self.assertTrue(any("parece ser uma checagem" in w.value for w in app.warning))
+        self.assertTrue(any("inconclusiva" in w.value for w in app.warning))
+        consultar.assert_called_once()
         self.assertFalse(app.metric)
         carregar.assert_not_called()
 

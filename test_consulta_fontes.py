@@ -98,11 +98,13 @@ class TestConsultaFontes(unittest.TestCase):
     def test_interface_consulta_sem_link_e_sem_svm(self):
         from streamlit.testing.v1 import AppTest
         app = AppTest.from_file(str(Path(__file__).resolve().parent / 'web/app.py')).run()
+        self.assertEqual([b.label for b in app.button], ['Consultar checagens pelo texto'])
+        self.assertFalse(app.selectbox)
         resultado = self.consultar()
         with patch('consulta_fontes.consultar_fontes', return_value=resultado) as buscar, \
              patch('inferencia.Classificador') as modelo:
             app.text_area[0].set_value(ALEGACAO)
-            app.button[1].click().run()
+            app.button[0].click().run()
         self.assertFalse(app.exception)
         self.assertFalse(app.metric)
         self.assertTrue(any('alegação falsa' in m.value for m in app.markdown))
@@ -115,7 +117,7 @@ class TestConsultaFontes(unittest.TestCase):
         with patch('consulta_fontes.consultar_fontes', return_value={'status': 'nao_encontrada', 'fontes': []}), \
              patch('inferencia.Classificador') as modelo:
             app.text_area[0].set_value(ALEGACAO)
-            app.button[1].click().run()
+            app.button[0].click().run()
         self.assertFalse(app.exception)
         self.assertFalse(app.metric)
         self.assertTrue(any('inconclusiva' in w.value for w in app.warning))

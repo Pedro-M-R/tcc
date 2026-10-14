@@ -2,8 +2,9 @@
 
 A consulta de checagens pelo texto está integrada ao formulário, sem exigir URL.
 Use **Colar título e texto → Consultar checagens pelo texto**. O resultado mostra
-a alegação identificada, a conclusão publicada e o link da fonte. O botão de
-SVM continua disponível como análise estatística separada.
+a alegação identificada, a conclusão publicada e o link da fonte. O formulário
+de texto tem somente o botão de consulta. A análise estatística por SVM
+continua no fluxo de leitura de links.
 
 O treinamento com variantes terminou e foi comparado com o modelo ativo.
 Melhorou o F1 macro de títulos e recortes, mas reduziu o F1 de notícias completas

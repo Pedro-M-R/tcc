@@ -56,7 +56,7 @@ def mostrar_consulta(resultado):
     st.write(mensagens[resultado['status']])
     for fonte in resultado.get('fontes', []):
         st.link_button(fonte['titulo'] or 'Consultar matéria', fonte['url'])
-    st.caption('Esta consulta não atribuiu verdadeiro ou falso ao texto. Você também pode solicitar a análise estatística pelo botão Analisar notícia com SVM.')
+    st.caption('Esta consulta não atribuiu verdadeiro ou falso ao texto. Confira as fontes disponíveis antes de concluir.')
 
 
 def mostrar_resultado(resultado, nome="TF-IDF + SVM"):
@@ -141,6 +141,7 @@ titulo, texto = "", ""
 noticia_extraida = None
 erro_link = None
 consultar = False
+enviar = False
 
 with coluna_entrada, st.container(border=True, key="painel_entrada"):
     st.markdown('<div class="painel-cabecalho"><span class="numero">01</span><h3>Qual é a notícia?</h3></div>'
@@ -150,28 +151,26 @@ with coluna_entrada, st.container(border=True, key="painel_entrada"):
     modelos = modelos_do_site()
     opcoes = {"Comparar os dois modelos": modelos} if len(modelos) > 1 else {}
     opcoes.update({m["nome"]: [m] for m in modelos})
-    selecao = st.selectbox("Modelos para análise", list(opcoes))
-    if len(modelos) == 1 and modelos[0]["tipo"] == "svm_leve":
-        st.caption("Análise com TF-IDF + SVM, executada em CPU.")
-    elif len(modelos) < 2 and modelos[0]["tipo"] not in {"local", "svm", "svm_leve"}:
-        st.warning("O SVM não está disponível nesta instalação. Inclua modelos/svm/modelo.joblib "
-                   "para comparar os dois modelos, como no testar_noticias.")
+    selecao = next(iter(opcoes))
+    if modo == "Usar um link":
+        selecao = st.selectbox("Modelos para análise", list(opcoes))
+        if len(modelos) == 1 and modelos[0]["tipo"] == "svm_leve":
+            st.caption("Análise com TF-IDF + SVM, executada em CPU.")
     if modo == "Colar título e texto":
         with st.form("noticia"):
             titulo = st.text_input("Título da notícia (opcional)", placeholder="Qual é a manchete?", max_chars=500)
             texto = st.text_area("Texto da notícia", placeholder="Cole o conteúdo que você quer analisar…",
                                  height=220, max_chars=30000)
-            st.caption("Para consultar fontes, cole a alegação ou a mensagem recebida. "
-                       "Para analisar com o SVM, envie o corpo da notícia com pelo menos 40 palavras e contexto.")
-            enviar = st.form_submit_button("Analisar notícia com SVM", use_container_width=True)
+            st.caption("Cole acima a alegação ou a mensagem recebida para consultar checagens publicadas.")
             consultar = st.form_submit_button("Consultar checagens pelo texto", type="primary", use_container_width=True)
             st.caption("Na consulta, termos do título ou início do texto são enviados à busca pública do Boatos.org. "
                        "A conclusão da fonte será mostrada se a alegação ou mensagem citada for reconhecida. "
                        "Não é necessário informar um link.")
-        if enviar:
+        if consultar:
             try:
                 url_colada = link_colado(titulo, texto)
                 if url_colada:
+                    consultar, enviar = False, True
                     with st.spinner("Lendo o link colado…"):
                         noticia_extraida = extrair_noticia(url_colada)
                         titulo, texto = noticia_extraida["titulo"], noticia_extraida["texto"]
@@ -262,4 +261,4 @@ with st.container(key="aviso_modelo"):
             "As previsões do SVM analisam padrões de texto e não verificam fatos. "
             "Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.")
 st.markdown('<div class="rodape"><span>Notícia em análise · Projeto acadêmico</span>'
-            '<span>TF-IDF + SVM · Revisão 2026.10.14-consulta-texto</span></div>', unsafe_allow_html=True)
+            '<span>TF-IDF + SVM · Revisão 2026.10.14-consulta-unica</span></div>', unsafe_allow_html=True)

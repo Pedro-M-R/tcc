@@ -46,7 +46,9 @@ def campos_formulario(elementos, formulario, consultar=False):
     return campos
 
 
-def verificar(url, titulo=None, texto=None, link=None, consultar=False):
+def verificar(url, titulo=None, texto=None, link=None, consultar=None):
+    if consultar is None:
+        consultar = link is None
     if consultar and link is not None:
         raise ValueError('A consulta por texto não recebe link.')
     wsurl = url.rstrip('/').replace('https://', 'wss://').replace('http://', 'ws://') + '/_stcore/stream'

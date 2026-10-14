@@ -14,6 +14,17 @@ from test_triagem import NOTICIA
 from triagem_noticias import INDICIOS
 
 
+def enviar_link(app, titulo, texto):
+    """Exercita inferência via link, sem depender de rede nos testes."""
+    app.radio[0].set_value("Usar um link").run()
+    with patch('extrair_link.extrair_noticia', return_value={
+        'titulo': titulo, 'texto': texto, 'url': 'https://example.org/noticia',
+        'texto_limitado': False,
+    }):
+        app.text_input[0].set_value('https://example.org/noticia')
+        app.button[0].click().run()
+
+
 class TestSite(unittest.TestCase):
     def setUp(self):
         # Os testes de comparação exercitam explicitamente a interface histórica.
@@ -56,13 +67,14 @@ class TestSite(unittest.TestCase):
             app = AppTest.from_file(str(WEB / "app.py"), default_timeout=30).run()
             self.assertEqual(len(app.exception), 0)
             self.assertEqual(carregar.call_count, 0)
+        app.radio[0].set_value("Usar um link").run()
         app.selectbox[0].set_value("BERTimbau Base").run()
         return app
 
     def test_formulario_vazio_nao_carrega_modelo(self):
         app = self.abrir()
         with patch("inferencia.Classificador") as carregar:
-            app.button[0].click().run()
+            enviar_link(app, '', '')
             self.assertEqual(len(app.warning), 1)
             carregar.assert_not_called()
 
@@ -76,9 +88,7 @@ class TestSite(unittest.TestCase):
             modelo.analisar.return_value = {"rotulo": "true", "truncado": False,
                                            "probabilidades": {"true": .8, "fake": .2}}
             with patch("inferencia.Classificador", return_value=modelo) as carregar:
-                app.text_input[0].set_value(titulo)
-                app.text_area[0].set_value(texto)
-                app.button[0].click().run()
+                enviar_link(app, titulo, texto)
             self.assertEqual(len(app.exception), 0)
             carregar.assert_not_called()
             modelo.analisar.assert_not_called()
@@ -94,8 +104,7 @@ class TestSite(unittest.TestCase):
         svm = Mock()
         svm.analisar.return_value = {"rotulo": "fake", "margem_svm": -.4}
         with patch("inferencia.Classificador", side_effect=[svm, RuntimeError("modelo indisponível")]), patch("logging.Logger.exception"):
-            app.text_area[0].set_value(NOTICIA)
-            app.button[0].click().run()
+            enviar_link(app, '', NOTICIA)
         self.assertEqual(len(app.exception), 0)
         self.assertEqual(len(app.error), 1)
         self.assertTrue(any("Comparação incompleta" in x.value for x in app.warning))
@@ -106,6 +115,7 @@ class TestSite(unittest.TestCase):
         import streamlit as st
         st.cache_resource.clear()
         inicial = AppTest.from_file(str(WEB / "app.py"), default_timeout=30).run()
+        inicial.radio[0].set_value("Usar um link").run()
         self.assertEqual(inicial.selectbox[0].value, "Comparar os dois modelos")
         app = self.abrir()
         app.selectbox[0].set_value("Comparar os dois modelos").run()
@@ -114,8 +124,7 @@ class TestSite(unittest.TestCase):
         bert.analisar.return_value = {"rotulo": "true", "truncado": False,
                                       "probabilidades": {"true": .99983, "fake": .00017}}
         with patch("inferencia.Classificador", side_effect=lambda caminho, tipo: svm if tipo == "svm" else bert):
-            app.text_area[0].set_value(NOTICIA)
-            app.button[0].click().run()
+            enviar_link(app, '', NOTICIA)
         self.assertEqual(len(app.exception), 0)
         self.assertTrue(any("discordam" in x.value for x in app.warning))
         self.assertEqual([x.value for x in app.metric], ["-0,4000", "99,98%", "0,02%"])
@@ -134,9 +143,7 @@ class TestSite(unittest.TestCase):
             }
             app = self.abrir()
             with patch("inferencia.Classificador", return_value=modelo):
-                app.text_input[0].set_value("Título")
-                app.text_area[0].set_value(NOTICIA)
-                app.button[0].click().run()
+                enviar_link(app, 'Título', NOTICIA)
             self.assertEqual(len(app.exception), 0)
             modelo.analisar.assert_called_once_with("Título", NOTICIA)
             self.assertTrue(any(f"<h2>{esperado}</h2>" in x.value for x in app.markdown))
@@ -150,9 +157,7 @@ class TestSite(unittest.TestCase):
             self.assertIn("pode errar", app.info[0].value)
             self.assertIn("não verificam fatos", app.info[0].value)
             # Nova submissão inválida não deve manter o resultado anterior.
-            app.text_area[0].set_value(" ")
-            app.text_input[0].set_value(" ")
-            app.button[0].click().run()
+            enviar_link(app, ' ', ' ')
             self.assertFalse(any("<h2>" in x.value for x in app.markdown))
             self.assertEqual(len(app.metric), 0)
         st.cache_resource.clear()
@@ -161,9 +166,7 @@ class TestSite(unittest.TestCase):
         app = self.abrir()
         with patch("inferencia.Classificador", side_effect=FileNotFoundError("arquivo interno")):
             with patch("logging.Logger.exception"):
-                app.text_input[0].set_value("Título")
-                app.text_area[0].set_value(NOTICIA)
-                app.button[0].click().run()
+                enviar_link(app, 'Título', NOTICIA)
         self.assertEqual(len(app.exception), 0)
         self.assertEqual(len(app.error), 1)
         self.assertNotIn("arquivo interno", app.error[0].value)

@@ -4,7 +4,8 @@ Revisão de 14/10/2026.
 
 No formulário **Colar título e texto**, cole a alegação ou mensagem recebida
 e clique em **Consultar checagens pelo texto**. Não é necessário informar URL.
-O botão **Analisar notícia com SVM** mantém a análise estatística separada.
+Este é o único botão de envio do formulário de texto. A análise com SVM
+permanece no fluxo **Usar um link**, quando a página não é uma checagem reconhecida.
 
 A consulta utiliza a busca pública do **Boatos.org**, sem chave de API. Envia
 até seis termos extraídos do título ou do início do texto. Não envia o corpo

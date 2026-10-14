@@ -8,17 +8,11 @@ from verificar_streamlit_remoto import verificar
 
 def main():
     registros = []
-    casos = [('opiniao_bonita', {'titulo': 'pedro eh bonita', 'texto': 'pedro eh bonita'}),
-             ('opiniao_bonito', {'titulo': 'pedro eh bonito', 'texto': 'pedro eh bonito'}),
-             ('triagem_noticia_curta', {'texto': 'O prefeito anunciou uma obra.'}),
-             ('triagem_elefante_texto', {'texto': 'elefante rosa no ceara'}),
-             ('triagem_elefante_titulo', {'titulo': 'elefante rosa no ceara'}),
-             ('triagem_elefante_repetido', {'texto': 'Elefante rosa no Ceará. ' * 30}),
-             ('noticia_com_contexto', {'titulo': 'Biblioteca abre na segunda', 'texto':
-                 'A prefeitura anunciou nesta terça-feira a abertura de uma biblioteca pública no bairro central. '
-                 'Segundo o comunicado divulgado pela secretaria de cultura, o espaço receberá estudantes e moradores '
-                 'a partir de segunda-feira, das oito às dezessete horas. A equipe informou que o acervo inicial '
-                 'terá cinco mil livros e acesso gratuito mediante cadastro presencial.'})]
+    casos = [('consulta_insuficiente', {'texto': 'oi'}),
+             ('checagem_por_texto', {'texto':
+                 'Flávio Bolsonaro estaria planejando forjar um atentado em Salvador e simular '
+                 'uma piora no estado de saúde de Jair Bolsonaro para influenciar o resultado '
+                 'das eleições de 2026.'})]
     urls = {
         'eduarda': 'https://www.boatos.org/politica/e-falso-que-eduarda-campopiano-tenha-declarado-ser-contra-o-voto-feminino.html',
         'tse': 'https://www.boatos.org/politica/tse-vai-investigar-se-atraso-na-divulgacao-de-resultados-das-eleicoes-tem-relacao-com-fraude-contra-flavio-bolsonaro.html',
@@ -35,7 +29,7 @@ def main():
         titulos = [s for s in mensagens if '<h2>' in s and not s.startswith('<style>')]
         rodape = [s for s in mensagens if 'class="rodape"' in s]
         metricas = [e['metric'] for e in elementos if 'metric' in e]
-        inconclusivo = any(e.get('alert', {}).get('body') == 'Análise inconclusiva'
+        inconclusivo = any(e.get('alert', {}).get('body') == 'Consulta às fontes inconclusiva'
                           for e in elementos)
         registro = {'caso': nome, 'resultados': titulos, 'rodape': rodape,
                     'erros': erros, 'inconclusivo': inconclusivo,
@@ -43,21 +37,15 @@ def main():
         registros.append(registro)
         print(json.dumps(registro, ensure_ascii=True), flush=True)
         assert not erros, registro
-        assert inconclusivo == nome.startswith('triagem'), registro
-        assert any('2026.10.14-consulta-texto' in s for s in rodape), registro
-        if nome.startswith('triagem'):
+        assert inconclusivo == (nome == 'consulta_insuficiente'), registro
+        assert any('2026.10.14-consulta-unica' in s for s in rodape), registro
+        if nome == 'consulta_insuficiente':
             assert not titulos and not metricas, registro
-            assert any('Nenhum escore de veracidade foi atribuído' in s for s in mensagens), registro
         elif nome.startswith('checagem'):
             assert len(titulos) == 1 and 'Há indícios de que seja uma alegação falsa' in titulos[0], registro
             assert 'Boatos.org' in titulos[0] and not metricas, registro
             assert not any('Há indícios de que seja verdadeira' in s for s in mensagens), registro
-        elif nome.startswith('opiniao'):
-            assert any('<h2>Falsa</h2>' in s for s in titulos), registro
-            assert not metricas, registro
-        else:
-            assert titulos and len(metricas) == 2, registro
-    saida = Path('resultados/revisao_textos_20261014/publicacao_consulta_texto.json')
+    saida = Path('resultados/revisao_textos_20261014/publicacao_consulta_unica.json')
     saida.parent.mkdir(parents=True, exist_ok=True)
     saida.write_text(json.dumps(registros, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'Publicacao validada: {len(casos)} casos, incluindo os dois links nos dois formularios.')

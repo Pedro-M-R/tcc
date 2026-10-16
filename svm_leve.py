@@ -8,7 +8,7 @@ import joblib
 import numpy as np
 
 from preparacao_noticias import preparar_noticia, simplificar, VERSAO_PREPARACAO
-from triagem_noticias import INDICIOS
+from triagem_noticias import INDICIOS, avaliar_entrada, resultado_inconclusivo
 
 
 def decidir(probs, limiar_fake=.5):
@@ -70,6 +70,10 @@ class ModeloSVMLeve:
                     "origem": "regra_opiniao",
                     "motivo": "Opinião pessoal classificada como falsa por uma regra do aplicativo. "
                               "Não é uma previsão do SVM nem uma verificação objetiva."}
+        motivo = avaliar_entrada(titulo, texto)
+        if motivo:
+            return {**resultado_inconclusivo(motivo), "rotulo": "inconclusivo",
+                    "origem": "triagem"}
         if getattr(self, "politica", {}).get("entrada_pipeline") == "bruta":
             entrada = f"{titulo}\n{texto}"
             from treinamento_local.limpeza import limpar_texto, VERSAO_LIMPEZA

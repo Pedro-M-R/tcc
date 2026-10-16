@@ -1,10 +1,18 @@
-# Consulta por texto: fontes primeiro, SVM em seguida
+# Consulta por texto: triagem, fontes e SVM
 
-Revisão de 16/10/2026 — `2026.10.16-fontes-svm`.
+Revisão de 16/10/2026 — `2026.10.16-triagem-restaurada`.
 
 No formulário **Colar título e texto**, cole a alegação ou mensagem recebida
 e clique em **Analisar notícia**. Não é necessário informar URL.
-Primeiro, o sistema consulta o **Boatos.org**. Se reconhecer a alegação e uma
+Primeiro, a triagem exige corpo com pelo menos 40 palavras, 20 palavras
+distintas e contexto noticioso. Frases como “elefante rosa no Piauí”, títulos
+isolados e repetições retornam **Análise inconclusiva**, sem consulta externa
+nem escore. Essa proteção também é aplicada na inferência pública do SVM.
+A regra preexistente para opiniões pessoais permanece separada.
+A mensagem de andamento é **Analisando a notícia…**; os detalhes das fontes
+ficam em **Como a análise funciona**.
+
+Após a triagem, o sistema consulta o **Boatos.org**. Se reconhecer a alegação e uma
 conclusão explícita, exibe o resultado da fonte. Uma conclusão falsa mostra
 “Há indícios de que seja uma alegação falsa”. Uma checagem verdadeira mantém
 seu resultado; o domínio sozinho não define falsidade.
@@ -14,11 +22,12 @@ a manchete, primeiro parágrafo ou corpo da notícia mostra “Há indícios de 
 seja verdadeira”, acompanhada do link. Páginas de Fato ou Fake e manchetes
 com marcadores explícitos de desmentido não recebem esse resultado.
 
-Sem correspondência confirmada, executa o **SVM** no texto original, inclusive
-em entradas curtas. Falhas de rede também permitem essa análise. A interface
+Sem correspondência confirmada, executa o **SVM** no texto original somente
+se a entrada passar pela triagem. Falhas de rede também permitem essa análise. A interface
 informa que esse resultado vem dos padrões do modelo, que pode errar.
 Os pesos e o treinamento não foram alterados. O fluxo de links mantém a
-triagem de contexto existente.
+triagem de contexto existente. O filtro usa regras de conteúdo e tamanho;
+não detecta toda afirmação inventada nem comprova a veracidade de textos aceitos.
 
 A consulta utiliza as buscas públicas do **Boatos.org** e do **G1**, sem chave de API. Envia
 até seis termos extraídos do título ou do início do texto. Não envia o corpo
@@ -103,7 +112,9 @@ Os testes isolam a rede e cobrem conclusões falsas/verdadeiras, mensagens
 citadas, mudanças de negação/data/sujeito, ausência de selo, fonte indisponível,
 domínio imitado e conflitos. Testes de interface verificam que uma
 correspondência não chama o SVM, que o G1 mostra o indício favorável e que
-ausência de correspondência ou indisponibilidade executam o modelo.
+ausência de correspondência ou indisponibilidade executam o modelo apenas
+com contexto suficiente. `test_svm_leve` cobre a abstenção no formulário,
+nos links e na inferência direta, inclusive após um resultado favorável anterior.
 
 A consulta depende da disponibilidade e do HTML da fonte. Notícias para as
 quais não exista checagem nesse site e textos reformulados podem não ser

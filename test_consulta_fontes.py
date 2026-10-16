@@ -11,6 +11,7 @@ from consulta_fontes import (consultar_boatos as consultar_fontes, consultar_g1,
                             consultar_fontes as consultar_todas, buscar_g1,
                             correspondencia, correspondencia_g1, consultas)
 from extrair_link import ErroLink
+from test_triagem import NOTICIA
 
 URL = 'https://www.boatos.org/brasil/biblioteca.html'
 ALEGACAO = 'A prefeitura vai fechar todas as bibliotecas públicas da cidade em 2026.'
@@ -105,12 +106,12 @@ class TestConsultaFontes(unittest.TestCase):
         resultado = self.consultar()
         with patch('consulta_fontes.consultar_fontes', return_value=resultado) as buscar, \
              patch('inferencia.Classificador') as modelo:
-            app.text_area[0].set_value(ALEGACAO)
+            app.text_area[0].set_value(ALEGACAO + '\n\n' + NOTICIA)
             app.button[0].click().run()
         self.assertFalse(app.exception)
         self.assertFalse(app.metric)
         self.assertTrue(any('alegação falsa' in m.value for m in app.markdown))
-        buscar.assert_called_once_with('', ALEGACAO)
+        buscar.assert_called_once_with('', ALEGACAO + '\n\n' + NOTICIA)
         modelo.assert_not_called()
 
     def test_interface_sem_correspondencia_executa_svm(self):
@@ -124,10 +125,10 @@ class TestConsultaFontes(unittest.TestCase):
                 modelo.analisar.return_value = {'rotulo': 'fake', 'margem_svm': -.7}
                 with patch('consulta_fontes.consultar_fontes', return_value={'status': status, 'fontes': []}), \
                      patch('inferencia.Classificador', return_value=modelo):
-                    app.text_area[0].set_value(ALEGACAO)
+                    app.text_area[0].set_value(NOTICIA)
                     app.button[0].click().run()
                 self.assertFalse(app.exception)
-                modelo.analisar.assert_called_once_with('', ALEGACAO)
+                modelo.analisar.assert_called_once_with('', NOTICIA)
                 self.assertTrue(any('Indícios identificados pelo modelo' in m.value for m in app.markdown))
         st.cache_resource.clear()
 
@@ -201,7 +202,7 @@ class TestConsultaG1(unittest.TestCase):
                      'alegacao': G1_TEXTO, 'url': G1_URL}}
         with patch('consulta_fontes.consultar_fontes', return_value=resultado), \
              patch('inferencia.Classificador') as modelo:
-            app.text_area[0].set_value(G1_TEXTO)
+            app.text_area[0].set_value(G1_TEXTO + '\n\n' + NOTICIA)
             app.button[0].click().run()
         self.assertFalse(app.exception)
         self.assertTrue(any('Há indícios de que seja verdadeira' in m.value for m in app.markdown))

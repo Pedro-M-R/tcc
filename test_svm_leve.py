@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 import numpy as np
 import pandas as pd
 
-from svm_leve import ModeloSVMLeve, opiniao_pessoal
+from svm_leve import ModeloSVMLeve, decidir, opiniao_pessoal
 from preparacao_noticias import preparar_noticia
 from web.inferencia import Classificador, modelos_do_site
 from test_triagem import NOTICIA
@@ -32,13 +32,24 @@ class TestSVMLeve(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "concluído"):
                 ModeloSVMLeve(pasta)
 
-    def test_texto_curto_nao_e_bloqueado_por_triagem_ou_limiar_antigo(self):
+    def test_triagem_impede_escore_favoravel_para_entrada_sem_contexto(self):
         modelo = ModeloSVMLeve.__new__(ModeloSVMLeve)
         modelo.politica = {"rotulos": ["fake", "true"], "limiares": [1.1, 1.1]}
         modelo.escores = Mock(return_value=np.array([[.49, .51]]))
-        for titulo, texto in (("", "Olá"), ("Somente o título", ""), ("", NOTICIA)):
-            self.assertEqual(modelo.analisar_noticia(titulo, texto)['rotulo'], "true")
-        self.assertEqual(modelo.escores.call_count, 3)
+        frase = "elefante rosa no Piauí"
+        for titulo, texto in (("", "Olá"), ("Somente o título", ""),
+                              ("", frase), (frase, ""), (frase, frase),
+                              ("", "ELEFANTE ROSA NO PIAUI!"),
+                              ("", "Um elefante rosa foi encontrado no Piauí."),
+                              ("", (frase + ". ") * 30), ("", "gato azul na lua")):
+            with self.subTest(titulo=titulo, texto=texto):
+                resultado = modelo.analisar_noticia(titulo, texto)
+                self.assertEqual(resultado['rotulo'], "inconclusivo")
+                self.assertEqual(resultado['origem'], "triagem")
+                self.assertNotIn('probabilidades', resultado)
+        modelo.escores.assert_not_called()
+        self.assertEqual(modelo.analisar_noticia('', NOTICIA)['rotulo'], "true")
+        modelo.escores.assert_called_once()
         with self.assertRaisesRegex(ValueError, "Digite"):
             modelo.analisar_noticia(" ", " ")
 
@@ -64,7 +75,7 @@ import sys
 from web.inferencia import Classificador
 m = Classificador(sys.argv[1])
 assert m.tipo == 'svm_leve'
-assert m.analisar('', 'Olá')['rotulo'] in ('fake', 'true')
+assert m.analisar('', 'Olá')['rotulo'] == 'inconclusivo'
 assert 'torch' not in sys.modules
 assert 'transformers' not in sys.modules
 assert 'prever' not in sys.modules
@@ -74,13 +85,53 @@ print('CPU OK')
         r = subprocess.run([sys.executable, "-c", codigo, str(MODELO)], cwd=RAIZ, capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stderr)
 
-    def test_modelo_real_sempre_classifica_textos_preenchidos(self):
+    def test_modelo_real_se_abstem_em_textos_sem_contexto(self):
         modelo = ModeloSVMLeve(MODELO)
-        for texto in (NOTICIA, "O prefeito anunciou uma obra.", "galaxias unicornios dragao nebulosa"):
+        for texto in ("elefante rosa no Piauí", "O prefeito anunciou uma obra.", "galaxias unicornios dragao nebulosa"):
             r = modelo.analisar_noticia("", texto)
-            self.assertIn(r["rotulo"], ("fake", "true"))
-            self.assertEqual(r["origem"], "svm")
-            self.assertAlmostEqual(sum(r["probabilidades"].values()), 1.)
+            self.assertEqual(r["rotulo"], "inconclusivo")
+            self.assertNotIn("probabilidades", r)
+        r = modelo.analisar_noticia("", NOTICIA)
+        self.assertIn(r["rotulo"], ("fake", "true"))
+        self.assertEqual(r["origem"], "svm")
+        self.assertAlmostEqual(sum(r["probabilidades"].values()), 1.)
+
+    def test_formulario_de_texto_aplica_triagem_antes_das_fontes(self):
+        import streamlit as st
+        from streamlit.testing.v1 import AppTest
+        st.cache_resource.clear()
+        self.addCleanup(st.cache_resource.clear)
+        sys.path.insert(0, str(RAIZ / "web"))
+        app = AppTest.from_file(str(RAIZ / "web/app.py"), default_timeout=30).run()
+        frase = "elefante rosa no Piauí"
+        with patch("consulta_fontes.consultar_fontes") as buscar, \
+             patch("inferencia.Classificador") as carregar:
+            # Um resultado anterior não pode sobreviver à submissão inválida.
+            buscar.return_value = {'status': 'nao_encontrada', 'fontes': []}
+            carregar.return_value.analisar.return_value = {
+                'rotulo': 'true', 'margem_svm': .8}
+            app.text_area[0].set_value(NOTICIA)
+            app.button[0].click().run()
+            self.assertFalse(app.exception)
+            self.assertTrue(app.metric)
+            buscar.reset_mock()
+            carregar.reset_mock()
+            carregar.return_value.analisar.reset_mock()
+            for titulo, texto in (("", frase), (frase, ""), (frase, frase),
+                                  ("", "ELEFANTE ROSA NO PIAUI!"),
+                                  ("", (frase + ". ") * 30), ("", "gato azul na lua")):
+                with self.subTest(titulo=titulo, texto=texto):
+                    app.text_input[0].set_value(titulo)
+                    app.text_area[0].set_value(texto)
+                    app.button[0].click().run()
+                    self.assertFalse(app.exception)
+                    self.assertFalse(app.error)
+                    self.assertEqual([w.value for w in app.warning], ["Análise inconclusiva"])
+                    self.assertFalse(app.metric)
+                    self.assertFalse(any('<h2>' in m.value for m in app.markdown))
+            buscar.assert_not_called()
+            carregar.assert_not_called()
+            carregar.return_value.analisar.assert_not_called()
 
     def test_streamlit_caso_pedro_e_texto_curto(self):
         import streamlit as st
@@ -181,8 +232,16 @@ print('CPU OK')
             noticia = base.iloc[int(linha.linha_csv) - 2]
             with self.subTest(linha=int(linha.linha_csv)):
                 r = modelo.analisar(noticia.titulo, noticia.texto)
-                self.assertEqual(r['rotulo'], linha.resultado)
-                p = modelo.leve.escores([preparar_noticia(noticia.titulo, noticia.texto)])[0]
+                motivo = avaliar_entrada(noticia.titulo, noticia.texto)
+                self.assertEqual(r['rotulo'], 'inconclusivo' if motivo else linha.resultado)
+                if motivo:
+                    self.assertNotIn('probabilidades', r)
+                entrada = (f'{noticia.titulo}\n{noticia.texto}'
+                           if modelo.leve.politica.get('entrada_pipeline') == 'bruta'
+                           else preparar_noticia(noticia.titulo, noticia.texto))
+                p = modelo.leve.escores([entrada])[0]
+                indice = int(decidir(p.reshape(1, -1), modelo.leve.politica.get('limiar_fake', .5))[0])
+                self.assertEqual(modelo.leve.politica['rotulos'][indice], linha.resultado)
                 self.assertAlmostEqual(float(p.sum()), 1.)
 
     @unittest.skipUnless((RAIZ / "resultados/bases/base_atualizada_2026-10-06.csv").is_file(), "Exige base local")

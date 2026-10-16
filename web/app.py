@@ -172,10 +172,11 @@ with coluna_entrada, st.container(border=True, key="painel_entrada"):
             titulo = st.text_input("Título da notícia (opcional)", placeholder="Qual é a manchete?", max_chars=500)
             texto = st.text_area("Texto da notícia", placeholder="Cole o conteúdo que você quer analisar…",
                                  height=220, max_chars=30000)
-            st.caption("Consultamos o Boatos.org e o G1 primeiro. Sem correspondência, analisamos o texto com o modelo.")
+            st.caption("Envie o corpo da notícia com pelo menos 40 palavras e contexto do acontecimento.")
             consultar = st.form_submit_button("Analisar notícia", type="primary", use_container_width=True)
-            st.caption("Termos do título ou início do texto são enviados às buscas públicas do Boatos.org e do G1. "
-                       "Quando houver correspondência, mostraremos o resultado e o link da fonte.")
+            with st.expander("Como a análise funciona"):
+                st.caption("Após a triagem, termos do título ou início do texto são enviados às buscas públicas do Boatos.org e do G1. "
+                           "Quando houver correspondência, mostraremos o resultado e o link da fonte.")
         if consultar:
             try:
                 url_colada = link_colado(titulo, texto)
@@ -218,8 +219,11 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
                 '<p class="painel-subtitulo">Uma estimativa para ajudar na sua leitura crítica.</p>', unsafe_allow_html=True)
     if erro_link:
         st.warning(erro_link)
+    elif consultar and avaliar_entrada(titulo, texto):
+        # Entradas sem contexto não consultam fontes nem chegam ao SVM.
+        enviar = True
     elif consultar and (titulo.strip() or texto.strip()):
-        with st.spinner('Consultando Boatos.org e G1…'):
+        with st.spinner('Analisando a notícia…'):
             consulta = consultar_fontes(titulo, texto)
         mostrar_consulta(consulta)
         enviar = consulta['status'] not in {'encontrada', 'conflitante'}
@@ -238,16 +242,16 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
             st.write("A página contém uma checagem, mas não encontramos um veredito explícito e único. "
                      "Não é possível concluir se a alegação é falsa ou verdadeira por esta leitura.")
             st.link_button("Consultar a página original", noticia_extraida["url"])
-        elif texto_parece_checagem(texto):
-            st.warning("O texto colado parece ser uma checagem")
-            st.write("Para analisar a alegação examinada pela fonte, envie o link da checagem. "
-                     "O texto colado mistura a alegação com a explicação; sua origem ainda não foi verificada.")
-        elif not consultar and (motivo := avaliar_entrada(titulo, texto)) and not (
+        elif (motivo := avaliar_entrada(titulo, texto)) and not (
             all(m["tipo"] == "svm_leve" for m in opcoes[selecao]) and opiniao_pessoal(titulo, texto)
         ):
             st.warning("Análise inconclusiva")
             st.write(motivo)
             st.caption("Nenhum escore de veracidade foi atribuído. A triagem usa regras de tamanho e conteúdo e também pode falhar.")
+        elif texto_parece_checagem(texto):
+            st.warning("O texto colado parece ser uma checagem")
+            st.write("Para analisar a alegação examinada pela fonte, envie o link da checagem. "
+                     "O texto colado mistura a alegação com a explicação; sua origem ainda não foi verificada.")
         else:
             resultados = []
             with st.spinner("Analisando a notícia… O primeiro acesso pode levar alguns instantes."):
@@ -276,4 +280,4 @@ with st.container(key="aviso_modelo"):
             "As previsões do SVM analisam padrões de texto e não verificam fatos. "
             "Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.")
 st.markdown('<div class="rodape"><span>Notícia em análise · Projeto acadêmico</span>'
-            '<span>TF-IDF + SVM · Revisão 2026.10.16-fontes-svm</span></div>', unsafe_allow_html=True)
+            '<span>TF-IDF + SVM · Revisão 2026.10.16-triagem-restaurada</span></div>', unsafe_allow_html=True)

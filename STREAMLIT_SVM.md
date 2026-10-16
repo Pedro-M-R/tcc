@@ -1,10 +1,13 @@
 # Notícia em análise — TF-IDF + SVM binário
 
-**Atualização em 16/10/2026 — `fontes-svm`:** o formulário de texto consulta
-Boatos.org e G1 antes de executar o modelo. Uma correspondência no G1 mostra
+**Atualização em 16/10/2026 — `triagem-restaurada`:** o formulário de texto aplica
+a triagem antes de consultar Boatos.org e G1 ou executar o modelo. A mensagem
+de andamento é “Analisando a notícia…”. Frases como “elefante rosa no Piauí”
+retornam “Análise inconclusiva”, sem escore. Uma correspondência no G1 mostra
 “Há indícios de que seja verdadeira”; uma checagem falsa do Boatos.org mostra
 indícios de falsidade. Sem correspondência, o SVM analisa automaticamente o
-texto, inclusive entradas curtas. O fluxo de links mantém a triagem existente.
+texto somente quando passar pela triagem. A mesma proteção existe na inferência
+pública do SVM. O fluxo de links mantém a triagem existente.
 Veja [CONSULTA_POR_TEXTO.md](CONSULTA_POR_TEXTO.md).
 
 **Atualização do site em 09/10/2026 — `triagem1`:** a triagem de contexto agora

@@ -106,7 +106,7 @@ class TestChecagem(unittest.TestCase):
             app.button[0].click().run()
         self.assertFalse(app.exception)
         self.assertTrue(any("inconclusiva" in w.value for w in app.warning))
-        consultar.assert_called_once()
+        consultar.assert_not_called()
         self.assertFalse(app.metric)
         carregar.assert_not_called()
 

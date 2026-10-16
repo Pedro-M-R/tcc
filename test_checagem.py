@@ -119,7 +119,7 @@ class TestChecagem(unittest.TestCase):
             app.text_input[0].set_value(URL)
             app.button[0].click().run()
         self.assertFalse(app.exception)
-        self.assertTrue(any("Alegação verdadeira" in m.value for m in app.markdown))
+        self.assertTrue(any("Há indícios de que seja verdadeira" in m.value for m in app.markdown))
         self.assertFalse(any("Há indícios de que seja uma alegação falsa" in m.value for m in app.markdown))
 
     @unittest.skipUnless(all((Path("resultados/revisao_casos_reais") / (nome + ".html")).exists()

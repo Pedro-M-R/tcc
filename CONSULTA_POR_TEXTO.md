@@ -1,15 +1,28 @@
-# Consulta de checagens a partir do texto
+# Consulta por texto: fontes primeiro, SVM em seguida
 
-Revisão de 14/10/2026.
+Revisão de 16/10/2026 — `2026.10.16-fontes-svm`.
 
 No formulário **Colar título e texto**, cole a alegação ou mensagem recebida
-e clique em **Consultar checagens pelo texto**. Não é necessário informar URL.
-Este é o único botão de envio do formulário de texto. A análise com SVM
-permanece no fluxo **Usar um link**, quando a página não é uma checagem reconhecida.
+e clique em **Analisar notícia**. Não é necessário informar URL.
+Primeiro, o sistema consulta o **Boatos.org**. Se reconhecer a alegação e uma
+conclusão explícita, exibe o resultado da fonte. Uma conclusão falsa mostra
+“Há indícios de que seja uma alegação falsa”. Uma checagem verdadeira mantém
+seu resultado; o domínio sozinho não define falsidade.
 
-A consulta utiliza a busca pública do **Boatos.org**, sem chave de API. Envia
+Sem correspondência no Boatos.org, consulta o **G1**. Uma correspondência com
+a manchete, primeiro parágrafo ou corpo da notícia mostra “Há indícios de que
+seja verdadeira”, acompanhada do link. Páginas de Fato ou Fake e manchetes
+com marcadores explícitos de desmentido não recebem esse resultado.
+
+Sem correspondência confirmada, executa o **SVM** no texto original, inclusive
+em entradas curtas. Falhas de rede também permitem essa análise. A interface
+informa que esse resultado vem dos padrões do modelo, que pode errar.
+Os pesos e o treinamento não foram alterados. O fluxo de links mantém a
+triagem de contexto existente.
+
+A consulta utiliza as buscas públicas do **Boatos.org** e do **G1**, sem chave de API. Envia
 até seis termos extraídos do título ou do início do texto. Não envia o corpo
-inteiro. Examina até cinco páginas, com orçamento de aproximadamente 20 segundos
+inteiro. Examina até cinco páginas por fonte, com orçamento de aproximadamente 24 segundos
 (a resolução DNS depende do sistema operacional).
 
 O sistema só apresenta uma conclusão automaticamente se encontrar:
@@ -24,9 +37,11 @@ ou os mesmos nomes nunca bastam para atribuir verdadeiro/falso.
 
 O resultado identifica a alegação examinada e oferece o link da checagem. Não
 classifica toda a reportagem como falsa por ela descrever um boato. Matérias
-relacionadas sem correspondência são sugestões de leitura. Busca vazia, falha
-de rede ou conclusões conflitantes deixam a consulta inconclusiva; não disparam
-automaticamente um veredito do SVM.
+relacionadas sem correspondência são sugestões de leitura. Busca vazia ou falha
+de rede deixam a consulta inconclusiva e acionam o SVM. Conclusões conflitantes
+do Boatos.org permanecem inconclusivas. Entradas vazias pedem preenchimento.
+Artigos de checagem colados sem correspondência pedem o link original para
+evitar classificar a explicação como se fosse a alegação.
 
 ## Relação com o treinamento
 
@@ -86,8 +101,9 @@ Na pasta `.publicacao-svm`, com o ambiente Python do projeto:
 
 Os testes isolam a rede e cobrem conclusões falsas/verdadeiras, mensagens
 citadas, mudanças de negação/data/sujeito, ausência de selo, fonte indisponível,
-domínio imitado e conflitos. Testes de interface verificam que a consulta não
-chama o SVM nem exibe percentuais inventados.
+domínio imitado e conflitos. Testes de interface verificam que uma
+correspondência não chama o SVM, que o G1 mostra o indício favorável e que
+ausência de correspondência ou indisponibilidade executam o modelo.
 
 A consulta depende da disponibilidade e do HTML da fonte. Notícias para as
 quais não exista checagem nesse site e textos reformulados podem não ser

@@ -2,6 +2,7 @@
 # Revisão svm3: renovar o processo na nuvem após remover o filtro de domínio.
 streamlit==1.64.0
 readability-lxml==0.9
+requests>=2.32,<3
 lxml>=5,<7
 pandas>=2.2,<3
 numpy>=1.26,<3

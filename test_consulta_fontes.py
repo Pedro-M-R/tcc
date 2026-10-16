@@ -2,12 +2,14 @@
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from lxml import html
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / 'web'))
-from consulta_fontes import consultar_fontes, correspondencia, consultas
+from consulta_fontes import (consultar_boatos as consultar_fontes, consultar_g1,
+                            consultar_fontes as consultar_todas, buscar_g1,
+                            correspondencia, correspondencia_g1, consultas)
 from extrair_link import ErroLink
 
 URL = 'https://www.boatos.org/brasil/biblioteca.html'
@@ -98,7 +100,7 @@ class TestConsultaFontes(unittest.TestCase):
     def test_interface_consulta_sem_link_e_sem_svm(self):
         from streamlit.testing.v1 import AppTest
         app = AppTest.from_file(str(Path(__file__).resolve().parent / 'web/app.py')).run()
-        self.assertEqual([b.label for b in app.button], ['Consultar checagens pelo texto'])
+        self.assertEqual([b.label for b in app.button], ['Analisar notícia'])
         self.assertFalse(app.selectbox)
         resultado = self.consultar()
         with patch('consulta_fontes.consultar_fontes', return_value=resultado) as buscar, \
@@ -111,16 +113,108 @@ class TestConsultaFontes(unittest.TestCase):
         buscar.assert_called_once_with('', ALEGACAO)
         modelo.assert_not_called()
 
-    def test_interface_sem_correspondencia_nao_cai_em_veredito_svm(self):
+    def test_interface_sem_correspondencia_executa_svm(self):
+        import streamlit as st
+        from streamlit.testing.v1 import AppTest
+        for status in ['nao_encontrada', 'indisponivel', 'relacionadas', 'insuficiente']:
+            with self.subTest(status=status):
+                st.cache_resource.clear()
+                app = AppTest.from_file(str(Path(__file__).resolve().parent / 'web/app.py')).run()
+                modelo = Mock()
+                modelo.analisar.return_value = {'rotulo': 'fake', 'margem_svm': -.7}
+                with patch('consulta_fontes.consultar_fontes', return_value={'status': status, 'fontes': []}), \
+                     patch('inferencia.Classificador', return_value=modelo):
+                    app.text_area[0].set_value(ALEGACAO)
+                    app.button[0].click().run()
+                self.assertFalse(app.exception)
+                modelo.analisar.assert_called_once_with('', ALEGACAO)
+                self.assertTrue(any('Indícios identificados pelo modelo' in m.value for m in app.markdown))
+        st.cache_resource.clear()
+
+
+G1_URL = 'https://g1.globo.com/sp/noticia/2026/10/16/bibliotecas.ghtml'
+G1_TITULO = 'Prefeitura anuncia novas bibliotecas públicas para os moradores da cidade'
+G1_TEXTO = 'A prefeitura anunciou nesta sexta-feira a abertura de novas bibliotecas públicas para atender moradores da cidade.'
+G1_HTML = (f'<html><head><meta charset="utf-8"></head><body><h1>{G1_TITULO}</h1>'
+           f'<p class="content-text__container">{G1_TEXTO}</p></body></html>').encode()
+
+
+class TestConsultaG1(unittest.TestCase):
+    def test_noticia_por_titulo_ou_texto(self):
+        for titulo, texto in [(G1_TITULO, ''), ('', G1_TEXTO), ('', G1_TITULO)]:
+            with patch('consulta_fontes.buscar_g1', return_value=[{'url': G1_URL, 'titulo': G1_TITULO}]), \
+                 patch('consulta_fontes.baixar_html', return_value=(G1_HTML, G1_URL)):
+                r = consultar_g1(titulo, texto)
+            self.assertEqual(r['status'], 'encontrada')
+            self.assertEqual(r['checagem']['rotulo'], 'true')
+            self.assertEqual(r['checagem']['fonte'], 'G1')
+
+    def test_negacao_data_e_sujeito_diferentes_nao_correspondem(self):
+        for texto in [G1_TEXTO.replace('anunciou', 'não anunciou'),
+                      G1_TEXTO.replace('sexta-feira', 'segunda-feira'),
+                      G1_TEXTO.replace('prefeitura', 'universidade')]:
+            self.assertIsNone(correspondencia_g1('', texto, html.fromstring(G1_HTML), G1_URL))
+
+    def test_fato_ou_fake_e_desmentido_nao_sao_indicios_de_verdade(self):
+        self.assertIsNone(correspondencia_g1('', G1_TEXTO, html.fromstring(G1_HTML),
+                                           G1_URL.replace('/sp/', '/fato-ou-fake/')))
+        pagina_falsa = G1_HTML.replace(G1_TITULO.encode(), ('É falso que ' + G1_TITULO).encode())
+        self.assertIsNone(correspondencia_g1('', G1_TEXTO, html.fromstring(pagina_falsa), G1_URL))
+
+    def test_dominio_imitado_e_redirecionamento_nao_atribuem_verdade(self):
+        imitado = G1_URL.replace('g1.globo.com', 'g1.globo.com.example.org')
+        with patch('consulta_fontes.buscar_g1', return_value=[{'url': imitado, 'titulo': G1_TITULO}]), \
+             patch('consulta_fontes.baixar_html') as baixar:
+            self.assertEqual(consultar_g1('', G1_TEXTO)['status'], 'nao_encontrada')
+            baixar.assert_not_called()
+        with patch('consulta_fontes.buscar_g1', return_value=[{'url': G1_URL, 'titulo': G1_TITULO}]), \
+             patch('consulta_fontes.baixar_html', return_value=(G1_HTML, imitado)):
+            self.assertNotEqual(consultar_g1('', G1_TEXTO)['status'], 'encontrada')
+
+    def test_api_extrai_url_original_e_filtra_outros_dominios(self):
+        from urllib.parse import urlencode
+        resposta = Mock()
+        resposta.json.return_value = [{'result': {'hits': {'hits': [
+            {'_source': {'title': G1_TITULO, 'url': 'https://measures.globo.com/v1/click?' + urlencode({'u': G1_URL})}},
+            {'_source': {'title': 'Outro site', 'url': 'https://example.org/noticia/x.ghtml'}}]}}}]
+        with patch('consulta_fontes.requests.post') as post:
+            post.return_value.__enter__.return_value = resposta
+            self.assertEqual(buscar_g1('prefeitura bibliotecas', 5), [{'titulo': G1_TITULO, 'url': G1_URL}])
+            self.assertEqual(post.call_args.kwargs['json'][0]['params']['q'], 'prefeitura bibliotecas')
+
+    def test_boatos_tem_prioridade_e_g1_e_consultado_sem_correspondencia(self):
+        for status in ['encontrada', 'conflitante']:
+            with patch('consulta_fontes.consultar_boatos', return_value={'status': status}) as boatos, \
+                 patch('consulta_fontes.consultar_g1') as g1:
+                self.assertEqual(consultar_todas('', ALEGACAO)['status'], status)
+                boatos.assert_called_once()
+                g1.assert_not_called()
+        with patch('consulta_fontes.consultar_boatos', return_value={'status': 'nao_encontrada', 'fontes': []}), \
+             patch('consulta_fontes.consultar_g1', return_value={'status': 'encontrada', 'checagem': {'fonte': 'G1'}}) as g1:
+            self.assertEqual(consultar_todas('', G1_TEXTO)['checagem']['fonte'], 'G1')
+            g1.assert_called_once()
+
+    def test_interface_g1_nao_executa_modelo(self):
         from streamlit.testing.v1 import AppTest
         app = AppTest.from_file(str(Path(__file__).resolve().parent / 'web/app.py')).run()
-        with patch('consulta_fontes.consultar_fontes', return_value={'status': 'nao_encontrada', 'fontes': []}), \
+        resultado = {'status': 'encontrada', 'checagem': {'fonte': 'G1', 'rotulo': 'true',
+                     'alegacao': G1_TEXTO, 'url': G1_URL}}
+        with patch('consulta_fontes.consultar_fontes', return_value=resultado), \
              patch('inferencia.Classificador') as modelo:
-            app.text_area[0].set_value(ALEGACAO)
+            app.text_area[0].set_value(G1_TEXTO)
             app.button[0].click().run()
         self.assertFalse(app.exception)
-        self.assertFalse(app.metric)
-        self.assertTrue(any('inconclusiva' in w.value for w in app.warning))
+        self.assertTrue(any('Há indícios de que seja verdadeira' in m.value for m in app.markdown))
+        self.assertTrue(any('Notícia correspondente encontrada no G1' in m.value for m in app.markdown))
+        modelo.assert_not_called()
+
+    def test_interface_vazia_nao_busca_nem_executa_modelo(self):
+        from streamlit.testing.v1 import AppTest
+        app = AppTest.from_file(str(Path(__file__).resolve().parent / 'web/app.py')).run()
+        with patch('consulta_fontes.consultar_fontes') as buscar, patch('inferencia.Classificador') as modelo:
+            app.button[0].click().run()
+        self.assertFalse(app.exception)
+        buscar.assert_not_called()
         modelo.assert_not_called()
 
 

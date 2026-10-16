@@ -26,7 +26,7 @@ def receber(ws):
 
 def campos_formulario(elementos, formulario, consultar=False):
     """Escolhe a ação pelo rótulo, sem depender da ordem dos botões."""
-    rotulos = ({'Consultar checagens pelo texto'} if consultar else
+    rotulos = ({'Consultar checagens pelo texto', 'Analisar notícia'} if consultar else
                {'Analisar notícia', 'Analisar notícia com SVM'})
     if formulario == 'link' and not consultar:
         rotulos = {'Ler link e analisar'}

@@ -34,7 +34,7 @@ publicação, incluindo o modelo, sem base de treinamento ou checkpoints.
    `web/requirements.txt`. Esse arquivo fica ao lado do app, conforme a
    [documentação de dependências](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/app-dependencies).
 4. Abra o app e confirme a única opção **TF-IDF + SVM** e o rodapé
-   **2026.10.09-triagem1**. Faça uma análise; abrir a página inicial não basta para
+   **2026.10.16-fontes-svm**. Faça uma análise; abrir a página inicial não basta para
    comprovar que o modelo carregou.
 
 Não use `requirements.txt` da raiz do projeto original para instalar o site:
@@ -53,7 +53,12 @@ Não há download de pesos ao abrir o site. `TCC_MODEL_PATH` e
 Para testar outro SVM treinado por `treinar_svm_leve.py`, configure
 `TCC_SVM_MODEL_PATH` com o caminho da pasta desse modelo.
 
-O site faz triagem antes de executar o SVM: exige corpo de notícia com pelo
+No formulário de texto, o site consulta primeiro o Boatos.org e depois o G1.
+Correspondências mostram o resultado da fonte com um link. Sem correspondência,
+o texto segue automaticamente para o SVM, inclusive entradas curtas.
+Veja [CONSULTA_POR_TEXTO.md](CONSULTA_POR_TEXTO.md).
+
+No fluxo de links, o site faz triagem antes de executar o SVM: exige corpo de notícia com pelo
 menos 40 palavras, 20 palavras distintas e sinais de contexto noticioso.
 Entradas insuficientes ou repetitivas retornam “Análise inconclusiva”, sem
 carregar o modelo e sem atribuir escore. Título repetido não aumenta o contexto.

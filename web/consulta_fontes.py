@@ -7,8 +7,9 @@ import html
 import re
 import time
 import unicodedata
-from urllib.parse import urlencode, urljoin, urlsplit
+from urllib.parse import parse_qs, urlencode, urljoin, urlsplit
 
+import requests
 from lxml import html as parser_html
 
 from checagem import extrair_checagem
@@ -88,7 +89,7 @@ def correspondencia(titulo, texto, checagem, arvore):
     return None
 
 
-def consultar_fontes(titulo, texto, tempo_limite=20):
+def consultar_boatos(titulo, texto, tempo_limite=20):
     limite = time.monotonic() + tempo_limite
     relacionados, correspondencias, vistos = [], [], set()
     falhas = 0
@@ -137,3 +138,112 @@ def consultar_fontes(titulo, texto, tempo_limite=20):
         return {'status': 'encontrada', 'checagem': correspondencias[0], 'fontes': relacionados}
     status = 'relacionadas' if relacionados else ('indisponivel' if falhas or time.monotonic() >= limite else 'nao_encontrada')
     return {'status': status, 'fontes': relacionados, 'falhas': falhas}
+
+
+def url_do_g1(url):
+    try:
+        p = urlsplit(url)
+        return (p.scheme == 'https' and p.hostname == 'g1.globo.com'
+                and not p.username and not p.password and p.port in (None, 443)
+                and '/noticia/' in p.path and p.path.endswith('.ghtml'))
+    except ValueError:
+        return False
+
+
+def buscar_g1(consulta, tempo_limite):
+    """Consulta o mesmo serviço público usado pelo formulário de busca do G1."""
+    pedido = [{'search_profile': 'sp_g1_globo_com', 'query': 'g1.info_query_recency',
+               'params': {'q': consulta, 'from': 0, 'size': 10}}]
+    with requests.post('https://busca.globo.com/v1/search', json=pedido,
+                       headers={'X-Tenant-Id': 'g1', 'X-Must-Thumborize': 'true',
+                                'X-Track-Urls': 'true', 'Origin': 'https://g1.globo.com',
+                                'Referer': 'https://g1.globo.com/'},
+                       timeout=min(8, tempo_limite), allow_redirects=False) as resposta:
+        resposta.raise_for_status()
+        dados = resposta.json()
+    if not isinstance(dados, list) or not dados:
+        raise ValueError('Resposta de busca do G1 não reconhecida.')
+    resultado = dados[0]['result']
+    if resultado.get('status', 200) != 200:
+        raise ValueError('Busca do G1 indisponível.')
+    fontes = []
+    for item in resultado['hits']['hits']:
+        fonte = item['_source']
+        url = fonte.get('url', '')
+        if urlsplit(url).hostname == 'measures.globo.com':
+            url = parse_qs(urlsplit(url).query).get('u', [''])[0]
+        if url_do_g1(url):
+            fontes.append({'titulo': fonte.get('title', ''), 'url': url})
+    return fontes
+
+
+def correspondencia_g1(titulo, texto, arvore, url):
+    # Uma checagem pode citar uma mentira: não a trata como notícia verdadeira.
+    if '/fato-ou-fake/' in urlsplit(url).path:
+        return None
+    cabecalhos = arvore.xpath('//h1')
+    if not cabecalhos:
+        return None
+    manchete = ' '.join(cabecalhos[0].text_content().split())
+    if re.search(r'\b(?:e falso|e fake|boato|fake news|nao e verdade)\b', normalizar(manchete)):
+        return None
+    paragrafos = arvore.xpath('//p[contains(concat(" ", normalize-space(@class), " "), " content-text__container ")]')
+    if not paragrafos:
+        return None
+    # Usa a manchete e o início editorial, nunca citações isoladas do meio da matéria.
+    alvos = [manchete, paragrafos[0].text_content(),
+             '\n\n'.join(p.text_content() for p in paragrafos)]
+    for alvo in alvos:
+        if correspondencia(titulo, texto, {'alegacao': alvo}, parser_html.fromstring('<article/>')):
+            return {'fonte': 'G1', 'url': url, 'alegacao': alvo.strip(),
+                    'rotulo': 'true', 'correspondencia': 'noticia'}
+    return None
+
+
+def consultar_g1(titulo, texto, tempo_limite=20):
+    limite = time.monotonic() + tempo_limite
+    relacionados, vistos, falhas = [], set(), 0
+    buscas = consultas(titulo, texto)
+    if not buscas:
+        return {'status': 'insuficiente', 'fontes': []}
+    for consulta in buscas:
+        if time.monotonic() >= limite or len(vistos) >= 5:
+            break
+        try:
+            fontes = buscar_g1(consulta, limite - time.monotonic())
+            for fonte in fontes:
+                url = fonte['url']
+                if url in vistos or not url_do_g1(url):
+                    continue
+                if len(vistos) >= 5 or time.monotonic() >= limite:
+                    break
+                vistos.add(url)
+                relacionados.append(fonte)
+                try:
+                    conteudo, final = baixar_html(url, tempo_limite=limite - time.monotonic())
+                    if not url_do_g1(final):
+                        continue
+                    noticia = correspondencia_g1(titulo, texto, parser_html.fromstring(conteudo), final)
+                    if noticia:
+                        return {'status': 'encontrada', 'checagem': noticia, 'fontes': relacionados}
+                except (ErroLink, ValueError, parser_html.etree.ParserError):
+                    falhas += 1
+        except (requests.RequestException, ValueError, KeyError, TypeError):
+            falhas += 1
+    status = 'relacionadas' if relacionados else ('indisponivel' if falhas or time.monotonic() >= limite else 'nao_encontrada')
+    return {'status': status, 'fontes': relacionados, 'falhas': falhas}
+
+
+def consultar_fontes(titulo, texto, tempo_limite=24):
+    """Prioriza a checagem; sem correspondência, procura a notícia no G1."""
+    boatos = consultar_boatos(titulo, texto, tempo_limite=tempo_limite / 2)
+    if boatos['status'] in {'encontrada', 'conflitante', 'insuficiente'}:
+        return boatos
+    g1 = consultar_g1(titulo, texto, tempo_limite=tempo_limite / 2)
+    if g1['status'] == 'encontrada':
+        return g1
+    fontes = boatos.get('fontes', []) + g1.get('fontes', [])
+    falhas = boatos.get('falhas', 0) + g1.get('falhas', 0)
+    status = 'relacionadas' if fontes else (
+        'indisponivel' if 'indisponivel' in {boatos['status'], g1['status']} else 'nao_encontrada')
+    return {'status': status, 'fontes': fontes, 'falhas': falhas}

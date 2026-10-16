@@ -16,12 +16,11 @@ class TestAcaoRemota(unittest.TestCase):
             self.assertEqual(campos_formulario(ordem, 'noticia')['button'], 'svm')
             self.assertEqual(campos_formulario(ordem, 'noticia', True)['button'], 'consulta')
 
-    def test_versao_antiga_nao_finge_ter_consulta(self):
+    def test_formulario_unico_consulta_fontes_e_analisa(self):
         elementos = [elemento('textInput', 'titulo'), elemento('textArea', 'texto'),
                      elemento('button', 'svm', 'Analisar notícia')]
         self.assertEqual(campos_formulario(elementos, 'noticia')['button'], 'svm')
-        with self.assertRaises(ValueError):
-            campos_formulario(elementos, 'noticia', True)
+        self.assertEqual(campos_formulario(elementos, 'noticia', True)['button'], 'svm')
 
     def test_link_mantem_acao_original(self):
         elementos = [elemento('textInput', 'url', formulario='link'),

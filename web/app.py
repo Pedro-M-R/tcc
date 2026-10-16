@@ -24,7 +24,7 @@ def carregar_modelo(caminho, tipo, versao=None):
 
 
 def mostrar_checagem(checagem):
-    rotulo = "Há indícios de que seja uma alegação falsa" if checagem["rotulo"] == "fake" else "Alegação verdadeira"
+    rotulo = "Há indícios de que seja uma alegação falsa" if checagem["rotulo"] == "fake" else "Há indícios de que seja verdadeira"
     classe = "falsa" if checagem["rotulo"] == "fake" else "verdadeira"
     st.markdown(
         f'<section class="resultado {classe}" role="status"><div>'
@@ -42,15 +42,26 @@ def mostrar_checagem(checagem):
 
 def mostrar_consulta(resultado):
     if resultado['status'] == 'encontrada':
+        fonte = resultado['checagem']
+        if fonte['fonte'] == 'G1':
+            st.markdown('<section class="resultado verdadeira" role="status"><div>'
+                        '<p>Notícia correspondente encontrada no G1</p>'
+                        '<h2>Há indícios de que seja verdadeira</h2></div></section>',
+                        unsafe_allow_html=True)
+            st.text(fonte['alegacao'])
+            st.link_button('Ler a notícia no G1', fonte['url'])
+            st.caption('O texto corresponde a uma publicação do G1. Este indício vem da fonte; '
+                       'não é uma previsão do SVM nem uma garantia de veracidade.')
+            return
         st.caption('Checagem encontrada a partir do texto informado.')
         mostrar_checagem(resultado['checagem'])
         return
     st.warning('Consulta às fontes inconclusiva')
     mensagens = {
         'relacionadas': 'Encontramos matérias relacionadas, mas não confirmamos uma correspondência exata com a alegação. Confira os links abaixo.',
-        'nao_encontrada': 'Não encontramos uma checagem correspondente no Boatos.org. Isso não significa que a notícia seja verdadeira.',
-        'indisponivel': 'A fonte não respondeu à consulta. Tente novamente mais tarde.',
-        'insuficiente': 'Informe a alegação com mais detalhes para buscar uma checagem.',
+        'nao_encontrada': 'Não encontramos correspondência no Boatos.org ou no G1. Isso não significa que a notícia seja verdadeira ou falsa.',
+        'indisponivel': 'Não foi possível concluir a consulta às fontes agora.',
+        'insuficiente': 'O texto não tem termos suficientes para a busca nas fontes.',
         'conflitante': 'Encontramos conclusões conflitantes. Consulte as fontes antes de concluir.',
     }
     st.write(mensagens[resultado['status']])
@@ -161,11 +172,10 @@ with coluna_entrada, st.container(border=True, key="painel_entrada"):
             titulo = st.text_input("Título da notícia (opcional)", placeholder="Qual é a manchete?", max_chars=500)
             texto = st.text_area("Texto da notícia", placeholder="Cole o conteúdo que você quer analisar…",
                                  height=220, max_chars=30000)
-            st.caption("Cole acima a alegação ou a mensagem recebida para consultar checagens publicadas.")
-            consultar = st.form_submit_button("Consultar checagens pelo texto", type="primary", use_container_width=True)
-            st.caption("Na consulta, termos do título ou início do texto são enviados à busca pública do Boatos.org. "
-                       "A conclusão da fonte será mostrada se a alegação ou mensagem citada for reconhecida. "
-                       "Não é necessário informar um link.")
+            st.caption("Consultamos o Boatos.org e o G1 primeiro. Sem correspondência, analisamos o texto com o modelo.")
+            consultar = st.form_submit_button("Analisar notícia", type="primary", use_container_width=True)
+            st.caption("Termos do título ou início do texto são enviados às buscas públicas do Boatos.org e do G1. "
+                       "Quando houver correspondência, mostraremos o resultado e o link da fonte.")
         if consultar:
             try:
                 url_colada = link_colado(titulo, texto)
@@ -208,11 +218,16 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
                 '<p class="painel-subtitulo">Uma estimativa para ajudar na sua leitura crítica.</p>', unsafe_allow_html=True)
     if erro_link:
         st.warning(erro_link)
-    elif consultar:
-        with st.spinner('Buscando uma checagem para o texto…'):
+    elif consultar and (titulo.strip() or texto.strip()):
+        with st.spinner('Consultando Boatos.org e G1…'):
             consulta = consultar_fontes(titulo, texto)
         mostrar_consulta(consulta)
-    elif enviar:
+        enviar = consulta['status'] not in {'encontrada', 'conflitante'}
+        if enviar:
+            st.info('Sem correspondência confirmada nas fontes. A seguir, os indícios identificados pelo modelo.')
+    elif consultar:
+        enviar = True
+    if enviar and not erro_link:
         checagem = noticia_extraida.get("checagem") if noticia_extraida else None
         if not (titulo.strip() or texto.strip()):
             st.warning("Cole o texto da notícia ou informe um título para continuar.")
@@ -227,7 +242,7 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
             st.warning("O texto colado parece ser uma checagem")
             st.write("Para analisar a alegação examinada pela fonte, envie o link da checagem. "
                      "O texto colado mistura a alegação com a explicação; sua origem ainda não foi verificada.")
-        elif (motivo := avaliar_entrada(titulo, texto)) and not (
+        elif not consultar and (motivo := avaliar_entrada(titulo, texto)) and not (
             all(m["tipo"] == "svm_leve" for m in opcoes[selecao]) and opiniao_pessoal(titulo, texto)
         ):
             st.warning("Análise inconclusiva")
@@ -248,7 +263,7 @@ with coluna_resultado, st.container(border=True, key="painel_resultado"):
                 st.warning("Comparação incompleta: um dos modelos não pôde ser executado.")
             if resultados:
                 mostrar_comparacao(resultados)
-    else:
+    elif not consultar and not erro_link:
         st.markdown('''<div class="vazio"><div class="vazio-icone" aria-hidden="true"><span>◎</span></div>
         <h3>Todo resultado começa<br>com uma boa leitura.</h3>
         <p>Envie uma notícia para análise. Os indícios encontrados ou uma orientação para completar o texto vão aparecer aqui.</p></div>
@@ -261,4 +276,4 @@ with st.container(key="aviso_modelo"):
             "As previsões do SVM analisam padrões de texto e não verificam fatos. "
             "Confira a notícia em fontes confiáveis antes de acreditar ou compartilhar.")
 st.markdown('<div class="rodape"><span>Notícia em análise · Projeto acadêmico</span>'
-            '<span>TF-IDF + SVM · Revisão 2026.10.14-consulta-unica</span></div>', unsafe_allow_html=True)
+            '<span>TF-IDF + SVM · Revisão 2026.10.16-fontes-svm</span></div>', unsafe_allow_html=True)
